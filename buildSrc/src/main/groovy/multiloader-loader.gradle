@@ -19,6 +19,9 @@ dependencies {
     }
     commonJava project(path: ':common', configuration: 'commonJava')
     commonResources project(path: ':common', configuration: 'commonResources')
+
+    compileOnly "com.github.Virtuoel:Pehkui:$pehkui"
+
 }
 
 tasks.named('compileJava', JavaCompile) {

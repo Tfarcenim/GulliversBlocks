@@ -16,6 +16,11 @@ dependencies {
         modImplementation "me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version"
         modImplementation "dev.architectury:architectury-fabric:$architectury_version"
     }
+
+    modImplementation("com.github.Virtuoel:Pehkui:$pehkui", {
+        exclude group: "net.fabricmc.fabric-api"
+    })
+
 }
 
 loom {
