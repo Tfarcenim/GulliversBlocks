@@ -1,6 +1,5 @@
 package tfar.gulliversblocks.effect;
 
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
@@ -8,14 +7,17 @@ import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
 import tfar.gulliversblocks.LivingEntityDuck;
 
-public class UpsizingEffect extends MobEffect {
+public class ResizeEffect extends MobEffect {
 
-    protected UpsizingEffect(MobEffectCategory pCategory, int pColor, ParticleOptions pParticle) {
-        super(pCategory, pColor, pParticle);
-    }
+    protected final boolean growing;
 
-    public UpsizingEffect(MobEffectCategory pCategory, int pColor) {
+//    protected ResizeEffect(MobEffectCategory pCategory, int pColor, ParticleOptions pParticle,boolean) {
+  //      super(pCategory, pColor, pParticle);
+  //  }
+
+    public ResizeEffect(MobEffectCategory pCategory, int pColor,boolean growing) {
         super(pCategory, pColor);
+        this.growing = growing;
     }
 
     @Override
@@ -29,7 +31,7 @@ public class UpsizingEffect extends MobEffect {
 
     @Override
     public void applyInstantenousEffect(@Nullable Entity pSource, @Nullable Entity pIndirectSource, LivingEntity pLivingEntity, int pAmplifier, double pHealth) {
-        int add = pAmplifier+1;
+        int add = (pAmplifier+1) * (growing ? 1 : -1);
         LivingEntityDuck.of(pLivingEntity).addGulliverScale(add);
     }
 
