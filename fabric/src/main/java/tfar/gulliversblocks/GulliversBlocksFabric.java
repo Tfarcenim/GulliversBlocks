@@ -1,8 +1,8 @@
-package com.example.examplemod;
+package tfar.gulliversblocks;
 
 import net.fabricmc.api.ModInitializer;
 
-public class ExampleMod implements ModInitializer {
+public class GulliversBlocksFabric implements ModInitializer {
     
     @Override
     public void onInitialize() {
@@ -12,7 +12,7 @@ public class ExampleMod implements ModInitializer {
         // project.
 
         // Use Fabric to bootstrap the Common mod.
-        Constants.LOG.info("Hello Fabric world!");
-        CommonClass.init();
+        GulliversBlocks.LOG.info("Hello Fabric world!");
+        GulliversBlocks.init();
     }
 }
