@@ -4,12 +4,14 @@ package tfar.gulliversblocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import tfar.gulliversblocks.datagen.ModDatagen;
 
 @Mod(GulliversBlocks.MOD_ID)
 public class GulliversBlocksNeoForge {
 
     public GulliversBlocksNeoForge(IEventBus eventBus) {
         eventBus.addListener(this::register);
+        eventBus.addListener(ModDatagen::gather);
         // This method is invoked by the NeoForge mod loader when it is ready
         // to load your mod. You can access NeoForge and Common code in this
         // project.

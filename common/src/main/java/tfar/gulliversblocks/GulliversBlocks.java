@@ -2,6 +2,7 @@ package tfar.gulliversblocks;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.alchemy.PotionBrewing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.gulliversblocks.init.ModMobEffects;
@@ -28,8 +29,9 @@ public class GulliversBlocks {
         // we have an interface in the common code and use a loader specific implementation to delegate our call to
         // the platform specific approach.
 
-
         GulliverScales.addScales();
+
+
     }
 
     public static void register() {
