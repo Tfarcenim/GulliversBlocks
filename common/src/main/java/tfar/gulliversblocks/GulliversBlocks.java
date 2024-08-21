@@ -52,8 +52,9 @@ public class GulliversBlocks {
             if (GulliverScales.valid(newScale)) {
                 double gulliverScale = GulliverScales.SCALES.get(newScale);
                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(living);
+                scaleData.setScaleTickDelay(40);
                 scaleData.setPersistence(true);
-                scaleData.setScale((float) gulliverScale);
+                scaleData.setTargetScale((float) gulliverScale);
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}",newScale);
             }
