@@ -25,14 +25,9 @@ public class ResizeEffect extends MobEffect {
         return true;
     }
 
-    public boolean shouldApplyEffectTickThisTick(int pDuration, int pAmplifier) {
-        return pDuration >= 1;
-    }
-
     @Override
     public void applyInstantenousEffect(@Nullable Entity pSource, @Nullable Entity pIndirectSource, LivingEntity pLivingEntity, int pAmplifier, double pHealth) {
         int add = (pAmplifier+1) * (growing ? 1 : -1);
         LivingEntityDuck.of(pLivingEntity).addGulliverScale(add);
     }
-
 }

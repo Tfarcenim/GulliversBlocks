@@ -1,5 +1,6 @@
 package tfar.gulliversblocks;
 
+import dev.architectury.event.events.common.CommandRegistrationEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
 import net.minecraft.world.item.Items;
@@ -17,6 +18,7 @@ public class GulliversBlocksFabric implements ModInitializer {
         // project.
 
         GulliversBlocks.register();
+        CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> ModCommands.dispatcher(dispatcher));
         FabricBrewingRecipeRegistryBuilder.BUILD.register(builder -> {
             builder.addMix(Potions.STRENGTH, Items.BONE_MEAL,ModPotions.UPSIZE_II);
             builder.addMix(Potions.WEAKNESS, Items.WIND_CHARGE,ModPotions.DOWNSIZE_II);
