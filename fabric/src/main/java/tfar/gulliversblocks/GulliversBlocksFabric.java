@@ -1,12 +1,23 @@
 package tfar.gulliversblocks;
 
 import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.event.events.common.InteractionEvent;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
+import org.jetbrains.annotations.Nullable;
 import tfar.gulliversblocks.init.ModPotions;
+import tfar.gulliversblocks.network.PacketHandler;
 
 public class GulliversBlocksFabric implements ModInitializer {
     
@@ -47,5 +58,20 @@ public class GulliversBlocksFabric implements ModInitializer {
         });
         // Use Fabric to bootstrap the Common mod.
         GulliversBlocks.init();
+        PacketHandler.registerPackets();
+        UseEntityCallback.EVENT.register(this::interact);
     }
+
+    InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        if (canPickup(player,entity)) {
+            entity.startRiding(player);
+            return InteractionResult.sidedSuccess(world.isClientSide);
+        }
+        return InteractionResult.PASS;
+    }
+
+    boolean canPickup(Player player,Entity entity) {
+        return true;
+    }
+
 }
