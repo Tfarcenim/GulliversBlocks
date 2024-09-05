@@ -8,7 +8,8 @@
     "LivingEntityMixinFabric"
   ],
   "client": [
-    "MinecraftMixin"
+    "MinecraftMixin",
+    "PlayerRendererMixinFabric"
   ],
   "server": [],
   "injectors": {

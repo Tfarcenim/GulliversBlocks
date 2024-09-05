@@ -1,8 +1,15 @@
 package tfar.gulliversblocks;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.gulliversblocks.init.ModMobEffects;
@@ -59,6 +66,17 @@ public class GulliversBlocks {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}",newScale);
             }
         }
+    }
+
+    public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick) {
+        HumanoidArm arm = player.getMainArm();
+        float x = -.5f;
+        float z = 0.5f;
+        int i = player.getPassengers().indexOf(pEntity);
+
+
+        return new Vec3(x, pDimensions.height() * 1/3f, z)
+                .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
     }
 
     public static ResourceLocation id(String path) {

@@ -2,6 +2,7 @@ package tfar.gulliversblocks.client;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
 
@@ -18,4 +19,11 @@ public class ModClient {
         }
     }
 
+    public static boolean onArmRender(Player player, HumanoidArm arm) {
+        List<Entity> passengers = player.getPassengers();
+        if (!passengers.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
 }
