@@ -11,11 +11,14 @@ import java.util.List;
 public class ModClient {
 
     public static void onRightClickEmpty(Player player, InteractionHand hand) {
+        boolean sneak = player.isCrouching();
         List<Entity> passengers = player.getPassengers();
         if (!passengers.isEmpty()) {
-            Entity passenger = passengers.getFirst();
-            passenger.stopRiding();
-            C2SDropHeldEntityPacket.send();
+            if (sneak) {
+                Entity passenger = passengers.getFirst();
+                passenger.stopRiding();
+                C2SDropHeldEntityPacket.send();
+            }
         }
     }
 

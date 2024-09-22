@@ -70,12 +70,14 @@ public class GulliversBlocks {
 
     public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick) {
         HumanoidArm arm = player.getMainArm();
-        float x = -.5f;
-        float z = 0.5f;
+        float z = 0.475f * pDimensions.width();
+        int j = arm == HumanoidArm.LEFT ? 1 : -1;
+        float x = j * .575f * pDimensions.width();
+        float y = .375f;
+
         int i = player.getPassengers().indexOf(pEntity);
 
-
-        return new Vec3(x, pDimensions.height() * 1/3f, z)
+        return new Vec3(x, pDimensions.height() * y, z)
                 .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
     }
 
@@ -83,4 +85,13 @@ public class GulliversBlocks {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID,path);
     }
 
+    static boolean canPickup(Player player,Entity entity) {
+        EntityDimensions playerDimensions = player.getDimensions(player.getPose());
+        EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
+        double playerVolume = playerDimensions.height() * playerDimensions.width() * playerDimensions.width();
+        double entityVolume = entityDimensions.height() * entityDimensions.width() * entityDimensions.width();
+        double ratio = playerVolume / entityVolume;
+
+        return ratio >=6;
+    }
 }
