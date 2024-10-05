@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -15,6 +16,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.Nullable;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.PacketHandler;
+
+import java.util.Map;
 
 public class GulliversBlocksFabric implements ModInitializer {
     
@@ -60,8 +63,35 @@ public class GulliversBlocksFabric implements ModInitializer {
     }
 
     InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-        if (GulliversBlocks.canPickup(player,entity)) {
+        if (GulliversBlocks.canPickup(player,hand,entity)) {
             entity.startRiding(player);
+            PlayerDuck playerDuck = PlayerDuck.of(player);
+            HumanoidArm mainArm = player.getMainArm();
+            Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
+            switch (mainArm) {
+                case RIGHT -> {
+                    switch (hand) {
+                        case MAIN_HAND -> {
+                            mountPos.put(MountPosition.RIGHT_HAND,entity);
+                        }
+                        case OFF_HAND -> {
+                            mountPos.put(MountPosition.LEFT_HAND,entity);
+                        }
+                    }
+                }
+                case LEFT -> {
+                    switch (hand) {
+                        case MAIN_HAND -> {
+                            mountPos.put(MountPosition.LEFT_HAND,entity);
+
+                        }
+                        case OFF_HAND -> {
+                            mountPos.put(MountPosition.RIGHT_HAND,entity);
+                        }
+                    }
+                }
+            }
+
             return InteractionResult.sidedSuccess(world.isClientSide);
         }
         return InteractionResult.PASS;

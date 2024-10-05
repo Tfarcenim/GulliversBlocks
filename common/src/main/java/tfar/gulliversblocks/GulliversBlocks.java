@@ -6,15 +6,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
 import virtuoel.pehkui.api.*;
+
+import java.util.Map;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -46,7 +46,7 @@ public class GulliversBlocks {
         ModPotions.boot();
     }
 
-    public static void onGulliverScaleChange(LivingEntity living,int oldScale, int newScale) {
+    public static void onGulliverScaleChange(LivingEntity living, int oldScale, int newScale) {
         if (newScale == 0) {
             for (ScaleType type : ScaleRegistries.SCALE_TYPES.values()) {
                 ScaleData data = type.getScaleData(living);
@@ -63,15 +63,14 @@ public class GulliversBlocks {
                 scaleData.setPersistence(true);
                 scaleData.setTargetScale((float) gulliverScale);
             } else {
-                GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}",newScale);
+                GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
             }
         }
     }
 
-    public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick) {
-        HumanoidArm arm = player.getMainArm();
+    public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick,MountPosition mountPosition) {
         float z = 0.475f * pDimensions.width();
-        int j = arm == HumanoidArm.LEFT ? 1 : -1;
+        int j = mountPosition == MountPosition.LEFT_HAND ? 1 : -1;
         float x = j * .575f * pDimensions.width();
         float y = .375f;
 
@@ -82,16 +81,50 @@ public class GulliversBlocks {
     }
 
     public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID,path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    static boolean canPickup(Player player,Entity entity) {
+    static boolean canPickup(Player player, InteractionHand hand, Entity entity) {
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        HumanoidArm mainArm = player.getMainArm();
+        Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
+        switch (mainArm) {
+            case RIGHT -> {
+                switch (hand) {
+                    case MAIN_HAND -> {
+                        if (mountPos.get(MountPosition.RIGHT_HAND) != null) {
+                            return false;
+                        }
+                    }
+                    case OFF_HAND -> {
+                        if (mountPos.get(MountPosition.LEFT_HAND) != null) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            case LEFT -> {
+                switch (hand) {
+                    case MAIN_HAND -> {
+                        if (mountPos.get(MountPosition.LEFT_HAND) != null) {
+                            return false;
+                        }
+                    }
+                    case OFF_HAND -> {
+                        if (mountPos.get(MountPosition.RIGHT_HAND) != null) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
         EntityDimensions playerDimensions = player.getDimensions(player.getPose());
         EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
         double playerVolume = playerDimensions.height() * playerDimensions.width() * playerDimensions.width();
         double entityVolume = entityDimensions.height() * entityDimensions.width() * entityDimensions.width();
         double ratio = playerVolume / entityVolume;
 
-        return ratio >=6;
+        return ratio >= 6;
     }
 }

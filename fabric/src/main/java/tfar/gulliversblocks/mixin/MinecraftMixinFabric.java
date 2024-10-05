@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import tfar.gulliversblocks.client.ModClient;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin {
+public class MinecraftMixinFabric {
 
 
     @Shadow @Nullable public HitResult hitResult;
@@ -29,5 +29,10 @@ public class MinecraftMixin {
         if (itemStack.isEmpty() && (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS)) {
             ModClient.onRightClickEmpty(player, interactionHand);
         }
+    }
+
+    @Inject(method = "handleKeybinds",at = @At("HEAD"))
+    private void onOffHandPressed(CallbackInfo ci) {
+        ModClient.interceptKeybinds((Minecraft)(Object)this);
     }
 }

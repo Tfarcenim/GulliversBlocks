@@ -1,5 +1,9 @@
 package tfar.gulliversblocks.client;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
@@ -28,5 +32,14 @@ public class ModClient {
             return true;
         }
         return false;
+    }
+
+    public static void interceptKeybinds(Minecraft minecraft) {
+        Player player = minecraft.player;
+        while(minecraft.options.keySwapOffhand.consumeClick()) {
+            if (!minecraft.player.isSpectator()) {
+
+            }
+        }
     }
 }
