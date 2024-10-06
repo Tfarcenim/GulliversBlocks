@@ -8,9 +8,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
+import tfar.gulliversblocks.MountPosition;
+import tfar.gulliversblocks.PlayerDuck;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
+import tfar.gulliversblocks.network.C2SSwapHandsPacket;
+import tfar.gulliversblocks.platform.Services;
 
 import java.util.List;
+import java.util.Map;
 
 public class ModClient {
 
@@ -36,9 +41,15 @@ public class ModClient {
 
     public static void interceptKeybinds(Minecraft minecraft) {
         Player player = minecraft.player;
-        while(minecraft.options.keySwapOffhand.consumeClick()) {
-            if (!minecraft.player.isSpectator()) {
-
+        if (player != null) {
+            PlayerDuck playerDuck = PlayerDuck.of(player);
+            Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
+            if (!mounts.isEmpty()) {
+                while (minecraft.options.keySwapOffhand.consumeClick()) {
+                    if (!player.isSpectator()) {
+                        Services.PLATFORM.sendToServer(new C2SSwapHandsPacket());
+                    }
+                }
             }
         }
     }

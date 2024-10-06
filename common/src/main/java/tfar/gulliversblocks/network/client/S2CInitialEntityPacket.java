@@ -1,9 +1,11 @@
-package tfar.gulliversblocks.network;
+package tfar.gulliversblocks.network.client;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import tfar.gulliversblocks.network.ModPacket;
+import tfar.gulliversblocks.network.S2CModPacket;
 
 
 public record S2CInitialEntityPacket(int entityID) implements S2CModPacket<RegistryFriendlyByteBuf> {
