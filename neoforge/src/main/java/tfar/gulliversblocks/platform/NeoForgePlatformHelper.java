@@ -10,14 +10,12 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.gulliversblocks.DankPacketHandlerNeoForge;
 import tfar.gulliversblocks.GulliversBlocks;
-import tfar.gulliversblocks.GulliversBlocksNeoForge;
 import tfar.gulliversblocks.network.C2SModPacket;
 import tfar.gulliversblocks.network.S2CModPacket;
 import tfar.gulliversblocks.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -52,18 +50,18 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
     public static PayloadRegistrar registrar;
     @Override
-    public <MSG extends S2CModPacket> void registerClientPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec) {
+    public <MSG extends S2CModPacket<?>> void registerClientPlayPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec) {
         registrar.playToClient(type, streamCodec, (p, t) -> p.handleClient());
     }
 
     @Override
-    public <MSG extends C2SModPacket> void registerServerPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf, MSG> streamCodec) {
+    public <MSG extends C2SModPacket<?>> void registerServerPlayPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf, MSG> streamCodec) {
         registrar.playToServer(type, streamCodec, (p, t) -> p.handleServer((ServerPlayer) t.player()));
     }
 
 
     @Override
-    public void sendToClient(S2CModPacket msg, ServerPlayer player) {
+    public void sendToClient(S2CModPacket<?> msg, ServerPlayer player) {
         DankPacketHandlerNeoForge.sendToClient(msg, player);
     }
 

@@ -1,9 +1,26 @@
 package tfar.gulliversblocks.network;
 
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
 
-public class C2SSwapHandsPacket implements C2SModPacket{
+public class C2SSwapHandsPacket implements C2SModPacket<RegistryFriendlyByteBuf> {
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, C2SSwapHandsPacket> STREAM_CODEC =
+            ModPacket.streamCodec(C2SSwapHandsPacket::new);
+
+
+    public static final CustomPacketPayload.Type<C2SSwapHandsPacket> TYPE = ModPacket.type(C2SSwapHandsPacket.class);
+
+    public C2SSwapHandsPacket() {
+
+    }
+
+    public C2SSwapHandsPacket(RegistryFriendlyByteBuf buf) {
+
+    }
+
     @Override
     public void handleServer(ServerPlayer player) {
 
@@ -11,6 +28,11 @@ public class C2SSwapHandsPacket implements C2SModPacket{
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
-        return null;
+        return TYPE;
+    }
+
+    @Override
+    public void write(RegistryFriendlyByteBuf buf) {
+
     }
 }

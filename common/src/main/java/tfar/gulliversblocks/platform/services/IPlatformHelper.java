@@ -64,10 +64,10 @@ public interface IPlatformHelper {
 
     <F> void registerAll(Map<String,? extends F> map, Registry<F> registry, Class<? extends F> filter);
 
-    <MSG extends S2CModPacket> void registerClientPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec);
-    <MSG extends C2SModPacket> void registerServerPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec);
+    <MSG extends S2CModPacket<?>> void registerClientPlayPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec);
+    <MSG extends C2SModPacket<?>> void registerServerPlayPacket(CustomPacketPayload.Type<MSG> type, StreamCodec<RegistryFriendlyByteBuf,MSG> streamCodec);
 
-    void sendToClient(S2CModPacket msg, ServerPlayer player);
-    void sendToServer(C2SModPacket msg);
+    void sendToClient(S2CModPacket<?> msg, ServerPlayer player);
+    void sendToServer(C2SModPacket<?> msg);
 
 }

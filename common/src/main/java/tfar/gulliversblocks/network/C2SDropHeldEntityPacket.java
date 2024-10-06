@@ -9,14 +9,14 @@ import tfar.gulliversblocks.platform.Services;
 
 import java.util.List;
 
-public class C2SDropHeldEntityPacket implements C2SModPacket {
+
+public class C2SDropHeldEntityPacket implements C2SModPacket<RegistryFriendlyByteBuf> {
 
     public static final StreamCodec<RegistryFriendlyByteBuf, C2SDropHeldEntityPacket> STREAM_CODEC =
-            StreamCodec.ofMember(C2SDropHeldEntityPacket::write, C2SDropHeldEntityPacket::new);
+            ModPacket.streamCodec(C2SDropHeldEntityPacket::new);
 
 
-    public static final CustomPacketPayload.Type<C2SDropHeldEntityPacket> TYPE = new CustomPacketPayload.Type<>(
-            PacketHandler.packet(C2SDropHeldEntityPacket.class));
+    public static final CustomPacketPayload.Type<C2SDropHeldEntityPacket> TYPE = ModPacket.type(C2SDropHeldEntityPacket.class);
 
     public C2SDropHeldEntityPacket() {
 
@@ -39,6 +39,7 @@ public class C2SDropHeldEntityPacket implements C2SModPacket {
         }
     }
 
+    @Override
     public void write(RegistryFriendlyByteBuf buf) {
     }
 
