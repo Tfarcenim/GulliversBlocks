@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import tfar.gulliversblocks.client.ModClient;
 import tfar.gulliversblocks.client.ModClientFabric;
@@ -30,6 +31,11 @@ public class MinecraftMixinFabric {
         if (itemStack.isEmpty() && (this.hitResult == null || this.hitResult.getType() == HitResult.Type.MISS)) {
             ModClient.onRightClickEmpty(player, interactionHand);
         }
+    }
+
+    @Inject(method = "startAttack",at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/LocalPlayer;resetAttackStrengthTicker()V",shift = At.Shift.AFTER))
+    private void onEmptyLeftClick(CallbackInfoReturnable<Boolean> cir) {
+        ModClient.onLeftClickEmpty(player);
     }
 
     @Inject(method = "handleKeybinds",at = @At("HEAD"))

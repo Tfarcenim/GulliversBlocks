@@ -9,6 +9,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.PlayerDuck;
+import tfar.gulliversblocks.network.C2SActionPacket;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
 import tfar.gulliversblocks.network.C2SSwapHandsPacket;
 import tfar.gulliversblocks.platform.Services;
@@ -26,6 +27,26 @@ public class ModClient {
                 Entity passenger = passengers.getFirst();
                 passenger.stopRiding();
                 C2SDropHeldEntityPacket.send();
+            }
+        }
+    }
+
+    public static void onLeftClickEmpty(Player player) {
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
+        HumanoidArm arm = player.getMainArm();
+        switch (arm) {
+            case RIGHT -> {
+                Entity entity = mounts.get(MountPosition.RIGHT_HAND);
+                if (entity != null) {
+                    C2SActionPacket.send(C2SActionPacket.Action.THROW);
+                }
+            }
+            case LEFT -> {
+                Entity entity = mounts.get(MountPosition.LEFT_HAND);
+                if (entity != null) {
+                    C2SActionPacket.send(C2SActionPacket.Action.THROW);
+                }
             }
         }
     }

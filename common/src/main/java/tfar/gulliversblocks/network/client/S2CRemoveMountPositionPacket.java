@@ -4,10 +4,12 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.client.ClientPacketHandler;
 import tfar.gulliversblocks.network.ModPacket;
 import tfar.gulliversblocks.network.S2CModPacket;
+import tfar.gulliversblocks.platform.Services;
 
 public class S2CRemoveMountPositionPacket implements S2CModPacket<RegistryFriendlyByteBuf> {
 
@@ -24,6 +26,10 @@ public class S2CRemoveMountPositionPacket implements S2CModPacket<RegistryFriend
 
     public S2CRemoveMountPositionPacket(FriendlyByteBuf buf) {
         mountPosition = buf.readEnum(MountPosition.class);
+    }
+
+    public static void send(MountPosition mountPosition, ServerPlayer player) {
+        Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(mountPosition),player);
     }
 
     @Override

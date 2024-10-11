@@ -20,6 +20,7 @@ public class ClientPacketHandler {
         if (level != null) {
             Entity entity = level.getEntity(s2CSetMountPositionPacket.entityId);
             if (entity != null) {
+
                 Player player = mc.player;
                 if (player != null) {
                     PlayerDuck playerDuck = PlayerDuck.of(player);

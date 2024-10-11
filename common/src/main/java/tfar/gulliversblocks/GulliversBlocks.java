@@ -2,6 +2,7 @@ package tfar.gulliversblocks;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -77,7 +78,7 @@ public class GulliversBlocks {
         switch (mountPosition) {
             case LEFT_SHOULDER -> {
                 float z = 0.475f * pDimensions.width();
-                int j = mountPosition == MountPosition.LEFT_SHOULDER ? 1 : -1;
+                int j = 1;
                 float x = j * .575f * pDimensions.width();
                 float y = .875f;
 
@@ -86,7 +87,7 @@ public class GulliversBlocks {
             }
             case RIGHT_SHOULDER -> {
                 float z = 0 * pDimensions.width();
-                int j = mountPosition == MountPosition.LEFT_SHOULDER ? 1 : -1;
+                int j = -1;
                 float x = j * .600f * pDimensions.width();
                 float y = .8f;
 
@@ -111,7 +112,7 @@ public class GulliversBlocks {
                 return new Vec3(x, pDimensions.height() * y, z)
                         .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
             }
-        };
+        }
         throw new RuntimeException("Unexpected mountpos:" +mountPosition);
     }
 
@@ -185,4 +186,30 @@ public class GulliversBlocks {
             Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos2),player);
         }
     }
+
+    public static void throwEntity(Entity thrown, Player pShooter, float pX, float pY, float pZ, float pVelocity) {
+        float f = -Mth.sin(pY * (float) (Math.PI / 180.0)) * Mth.cos(pX * (float) (Math.PI / 180.0));
+        float f1 = -Mth.sin((pX + pZ) * (float) (Math.PI / 180.0));
+        float f2 = Mth.cos(pY * (float) (Math.PI / 180.0)) * Mth.cos(pX * (float) (Math.PI / 180.0));
+        shoot(thrown,f, f1, f2, pVelocity);
+        Vec3 vec3 = pShooter.getKnownMovement();
+        thrown.setDeltaMovement(thrown.getDeltaMovement().add(vec3.x, pShooter.onGround() ? 0.0 : vec3.y, vec3.z));
+    }
+
+
+    /**
+     * Similar to setArrowHeading, it's point the throwable entity to a x, y, z direction.
+     */
+    public static void shoot(Entity thrown,double pX, double pY, double pZ, float pVelocity) {
+        Vec3 vec3 = new Vec3(pX, pY, pZ).normalize().scale(pVelocity);
+        thrown.setDeltaMovement(vec3);
+        thrown.hasImpulse = true;
+        double d0 = vec3.horizontalDistance();
+        thrown.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
+        thrown.setXRot((float)(Mth.atan2(vec3.y, d0) * 180.0F / (float)Math.PI));
+        thrown.yRotO = thrown.getYRot();
+        thrown.xRotO = thrown.getXRot();
+    }
+
+
 }
