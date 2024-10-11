@@ -1,6 +1,7 @@
 package tfar.gulliversblocks;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -12,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
+import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
+import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
+import tfar.gulliversblocks.platform.Services;
 import virtuoel.pehkui.api.*;
 
 import java.util.Map;
@@ -69,15 +73,46 @@ public class GulliversBlocks {
     }
 
     public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick,MountPosition mountPosition) {
-        float z = 0.475f * pDimensions.width();
-        int j = mountPosition == MountPosition.LEFT_HAND ? 1 : -1;
-        float x = j * .575f * pDimensions.width();
-        float y = .375f;
 
-        int i = player.getPassengers().indexOf(pEntity);
+        switch (mountPosition) {
+            case LEFT_SHOULDER -> {
+                float z = 0.475f * pDimensions.width();
+                int j = mountPosition == MountPosition.LEFT_SHOULDER ? 1 : -1;
+                float x = j * .575f * pDimensions.width();
+                float y = .875f;
 
-        return new Vec3(x, pDimensions.height() * y, z)
-                .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+                return new Vec3(x, pDimensions.height() * y, z)
+                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+            }
+            case RIGHT_SHOULDER -> {
+                float z = 0 * pDimensions.width();
+                int j = mountPosition == MountPosition.LEFT_SHOULDER ? 1 : -1;
+                float x = j * .600f * pDimensions.width();
+                float y = .8f;
+
+                return new Vec3(x, pDimensions.height() * y, z)
+                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+            }
+            case LEFT_HAND -> {
+                float z = 0.475f * pDimensions.width();
+                int j = 1;//
+                float x = j * .575f * pDimensions.width();
+                float y = .375f;
+
+                return new Vec3(x, pDimensions.height() * y, z)
+                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+            }
+            case RIGHT_HAND -> {
+                float z = 0.475f * pDimensions.width();
+                int j = -1;//
+                float x = j * .575f * pDimensions.width();
+                float y = .375f;
+
+                return new Vec3(x, pDimensions.height() * y, z)
+                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+            }
+        };
+        throw new RuntimeException("Unexpected mountpos:" +mountPosition);
     }
 
     public static ResourceLocation id(String path) {
@@ -126,5 +161,28 @@ public class GulliversBlocks {
         double ratio = playerVolume / entityVolume;
 
         return ratio >= 6;
+    }
+
+    public static void swap(ServerPlayer player, MountPosition pos1, MountPosition pos2) {
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
+        Entity mount1 = mounts.get(pos1);
+        Entity mount2 = mounts.get(pos2);
+
+        if (mount2 != null) {
+            mounts.put(pos1, mount2);
+            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos1,mount2),player);
+        } else {
+            mounts.remove(pos1);
+            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos1),player);
+        }
+
+        if (mount1 != null) {
+            mounts.put(pos2, mount1);
+            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos2,mount1),player);
+        } else {
+            mounts.remove(pos2);
+            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos2),player);
+        }
     }
 }

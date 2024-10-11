@@ -16,6 +16,7 @@ public class PacketHandler {
 
         Services.PLATFORM.registerServerPlayPacket(C2SDropHeldEntityPacket.TYPE, C2SDropHeldEntityPacket.STREAM_CODEC);
         Services.PLATFORM.registerServerPlayPacket(C2SSwapHandsPacket.TYPE, C2SSwapHandsPacket.STREAM_CODEC);
+        Services.PLATFORM.registerServerPlayPacket(C2SSwapShoulderPacket.TYPE,C2SSwapShoulderPacket.STREAM_CODEC);
 
 
         ///////server to client

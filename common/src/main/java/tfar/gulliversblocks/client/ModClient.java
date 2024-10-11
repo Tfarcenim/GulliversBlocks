@@ -1,9 +1,8 @@
 package tfar.gulliversblocks.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
@@ -32,11 +31,37 @@ public class ModClient {
     }
 
     public static boolean onArmRender(Player player, HumanoidArm arm) {
-        List<Entity> passengers = player.getPassengers();
-        if (!passengers.isEmpty()) {
-            return true;
+        PlayerDuck playerDuck = PlayerDuck.of(player);
+        Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
+
+        if (arm == HumanoidArm.RIGHT) {
+            return mounts.get(MountPosition.RIGHT_HAND) != null;
+        } else {
+            return mounts.get(MountPosition.LEFT_HAND) != null;
         }
-        return false;
+    }
+
+    public static HumanoidModel.ArmPose getArmPose(AbstractClientPlayer pPlayer, InteractionHand pHand) {
+        PlayerDuck playerDuck = PlayerDuck.of(pPlayer);
+        Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
+        HumanoidArm arm = pPlayer.getMainArm();
+        switch (pHand) {
+            case MAIN_HAND -> {
+                if (arm == HumanoidArm.RIGHT) {
+                    return mounts.get(MountPosition.RIGHT_HAND) != null ? HumanoidModel.ArmPose.ITEM : null;
+                } else {
+                    return mounts.get(MountPosition.LEFT_HAND) != null ? HumanoidModel.ArmPose.ITEM : null;
+                }
+            }
+            case OFF_HAND -> {
+                if (arm == HumanoidArm.LEFT) {
+                    return mounts.get(MountPosition.RIGHT_HAND) != null ? HumanoidModel.ArmPose.ITEM : null;
+                } else {
+                    return mounts.get(MountPosition.LEFT_HAND) != null ? HumanoidModel.ArmPose.ITEM : null;
+                }
+            }
+        }
+        return null;
     }
 
     public static void interceptKeybinds(Minecraft minecraft) {
