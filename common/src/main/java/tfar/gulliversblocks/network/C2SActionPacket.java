@@ -54,6 +54,11 @@ public class C2SActionPacket implements C2SModPacket<RegistryFriendlyByteBuf>  {
                     }
                 }
             }
+            case SWAP_HANDS -> GulliversBlocks.swap(player,MountPosition.LEFT_HAND,MountPosition.RIGHT_HAND);
+            case SWAP_SHOULDER -> {
+                GulliversBlocks.swap(player,MountPosition.RIGHT_HAND,MountPosition.RIGHT_SHOULDER);
+                GulliversBlocks.swap(player,MountPosition.LEFT_HAND,MountPosition.LEFT_SHOULDER);
+            }
         }
     }
 
@@ -67,7 +72,7 @@ public class C2SActionPacket implements C2SModPacket<RegistryFriendlyByteBuf>  {
     }
 
     public enum Action {
-        THROW
+        THROW,SWAP_HANDS,SWAP_SHOULDER;
     }
 
     @Override

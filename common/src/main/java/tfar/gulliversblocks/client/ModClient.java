@@ -11,7 +11,6 @@ import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.PlayerDuck;
 import tfar.gulliversblocks.network.C2SActionPacket;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
-import tfar.gulliversblocks.network.C2SSwapHandsPacket;
 import tfar.gulliversblocks.platform.Services;
 
 import java.util.List;
@@ -93,10 +92,16 @@ public class ModClient {
             if (!mounts.isEmpty()) {
                 while (minecraft.options.keySwapOffhand.consumeClick()) {
                     if (!player.isSpectator()) {
-                        Services.PLATFORM.sendToServer(new C2SSwapHandsPacket());
+                        C2SActionPacket.send(C2SActionPacket.Action.SWAP_HANDS);
                     }
                 }
             }
+        }
+    }
+
+    public static void keyPressed(Minecraft client) {
+        if (ModKeybinds.swap_shoulder.consumeClick()) {
+            C2SActionPacket.send(C2SActionPacket.Action.SWAP_SHOULDER);
         }
     }
 }
