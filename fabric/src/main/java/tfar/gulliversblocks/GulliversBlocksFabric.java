@@ -1,6 +1,8 @@
 package tfar.gulliversblocks;
 
+import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.event.events.common.InteractionEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
@@ -8,6 +10,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -60,6 +63,14 @@ public class GulliversBlocksFabric implements ModInitializer {
         GulliversBlocks.init();
         PacketHandler.registerPackets();
         UseEntityCallback.EVENT.register(this::interact);
+        InteractionEvent.FARMLAND_TRAMPLE.register((world, pos, state, distance, entity) -> {
+            if (entity instanceof LivingEntity living) {
+                if (living.getDimensions(living.getPose()).height() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
+                    return EventResult.interruptFalse();
+                }
+            }
+            return EventResult.pass();
+        });
     }
 
     InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {

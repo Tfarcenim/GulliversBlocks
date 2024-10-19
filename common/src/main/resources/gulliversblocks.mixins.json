@@ -6,7 +6,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "LivingEntityMixin",
-    "PlayerEntityMixin"
+    "PlayerEntityMixin",
+    "EntityMixin"
   ],
   "client": [
     "PlayerRendererMixin"

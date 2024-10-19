@@ -6,8 +6,12 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.PlayerDuck;
@@ -47,6 +51,9 @@ public class C2SActionPacket implements C2SModPacket<RegistryFriendlyByteBuf>  {
                             entity.stopRiding();
                             entity.hurtMarked = true;
                             entity.addDeltaMovement(player.getLookAngle().scale(2));
+                            if (entity instanceof LivingEntity living) {
+                                living.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,100,0));
+                            }
                             player.connection.send(new ClientboundSetPassengersPacket(player));
                             playerDuck.getMountPositions().remove(MountPosition.RIGHT_HAND);
                             S2CRemoveMountPositionPacket.send(MountPosition.RIGHT_HAND,player);

@@ -1,5 +1,6 @@
 package tfar.gulliversblocks;
 
+import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -8,6 +9,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
@@ -40,16 +45,20 @@ public class GulliversBlocks {
         // your own abstraction layer. You can learn more about this in our provided services class. In this example
         // we have an interface in the common code and use a loader specific implementation to delegate our call to
         // the platform specific approach.
-
         GulliverScales.addScales();
-
-
     }
 
     public static void register() {
         ModMobEffects.boot();
         ModPotions.boot();
     }
+
+    public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1/16d;
+    public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1/16d;
+    public static final double PRESSURE_PLATE_SIZE = 1.8 * 1/16d;
+
+    //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
+    public static final ResourceLocation MINING_SPEED = GulliversBlocks.id("mining_speed");
 
     public static void onGulliverScaleChange(LivingEntity living, int oldScale, int newScale) {
         if (newScale == 0) {
@@ -59,6 +68,11 @@ public class GulliversBlocks {
                 data.resetScale();
                 data.setPersistence(persist);
             }
+
+            if (living instanceof Player player) {
+                player.getAttribute(Attributes.BLOCK_BREAK_SPEED).removeModifier(MINING_SPEED);
+            }
+
         } else {
 
             if (GulliverScales.valid(newScale)) {
@@ -67,9 +81,27 @@ public class GulliversBlocks {
                 scaleData.setScaleTickDelay(40);
                 scaleData.setPersistence(true);
                 scaleData.setTargetScale((float) gulliverScale);
+
+                if (living instanceof Player player) {
+                    //multiplying by -1 is 0
+                    double speedModifier = Math.sqrt(gulliverScale);
+                    addAttributeSafely(player,Attributes.BLOCK_BREAK_SPEED,new AttributeModifier(MINING_SPEED,speedModifier - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                }
+
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
             }
+        }
+    }
+
+    public static void addAttributeSafely(LivingEntity entity, Holder<Attribute> attribute, AttributeModifier modifier) {
+        AttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            AttributeModifier old = attributeInstance.getModifier(modifier.id());
+            if (old != null) {
+                attributeInstance.removeModifier(modifier.id());
+            }
+            attributeInstance.addPermanentModifier(modifier);
         }
     }
 
