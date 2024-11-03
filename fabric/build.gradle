@@ -17,11 +17,11 @@ dependencies {
         modImplementation "dev.architectury:architectury-fabric:$architectury_version"
     }
 
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-neoforge:$neoforge_config_api_version"
-
     modImplementation("com.github.Virtuoel:Pehkui:$pehkui", {
         exclude group: "net.fabricmc.fabric-api"
     })
+
+    api "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:$neoforge_config_api_version"
 
 }
 

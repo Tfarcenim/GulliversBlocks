@@ -19,6 +19,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
+import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
@@ -69,7 +71,7 @@ public class GulliversBlocks {
     public static final double VISIBILITY_RATIO = 16;
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
-    public static final ResourceLocation MINING_SPEED = GulliversBlocks.id("mining_speed");
+    public static final ResourceLocation MODIFIER_ID = GulliversBlocks.id("attribute_modifier");
 
     public static void onGulliverScaleChange(LivingEntity living, int oldScale, int newScale) {
         if (newScale == 0) {
@@ -81,7 +83,12 @@ public class GulliversBlocks {
             }
 
             if (living instanceof Player player) {
-                player.getAttribute(Attributes.BLOCK_BREAK_SPEED).removeModifier(MINING_SPEED);
+                player.getAttribute(Attributes.BLOCK_BREAK_SPEED).removeModifier(MODIFIER_ID);
+            }
+
+            living.getAttribute(Attributes.MAX_HEALTH).removeModifier(MODIFIER_ID);
+            if (living.getAttribute(Attributes.ATTACK_DAMAGE) != null) {//some mobs don't have an attack damage stat
+                living.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(MODIFIER_ID);
             }
 
         } else {
@@ -95,9 +102,15 @@ public class GulliversBlocks {
 
                 if (living instanceof Player player) {
                     //multiplying by -1 is 0
-                    double speedModifier = Math.sqrt(gulliverScale);
-                    addAttributeSafely(player,Attributes.BLOCK_BREAK_SPEED,new AttributeModifier(MINING_SPEED,speedModifier - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+                    double speedModifier = Server.BLOCK_BREAK_SPEED_SCALING.get().function.applyAsDouble(gulliverScale);
+                    addAttributeMultSafely(player,Attributes.BLOCK_BREAK_SPEED,speedModifier);
                 }
+
+                double maxHealthModifier = Math.max(Server.MINIMUM_MAX_HEALTH_SCALE.get(), Server.MAX_HEALTH_SCALING.get().function.applyAsDouble(gulliverScale));
+                addAttributeMultSafely(living,Attributes.MAX_HEALTH,maxHealthModifier);
+
+                double attackDamageModifier = Server.ATTACK_DAMAGE_SCALING.get().function.applyAsDouble(gulliverScale);
+                addAttributeMultSafely(living,Attributes.ATTACK_DAMAGE,attackDamageModifier);
 
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
@@ -114,6 +127,11 @@ public class GulliversBlocks {
             }
             attributeInstance.addPermanentModifier(modifier);
         }
+    }
+
+    public static void addAttributeMultSafely(LivingEntity entity, Holder<Attribute> attribute,double value) {
+        addAttributeSafely(entity,attribute,new AttributeModifier(MODIFIER_ID,value - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+
     }
 
     public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick,MountPosition mountPosition) {

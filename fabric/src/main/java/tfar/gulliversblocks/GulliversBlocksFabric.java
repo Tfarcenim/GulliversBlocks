@@ -3,6 +3,7 @@ package tfar.gulliversblocks;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.InteractionEvent;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
@@ -23,7 +24,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.config.ModConfig;
 import org.jetbrains.annotations.Nullable;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.events.LivingWaterCallbacks;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.PacketHandler;
@@ -79,6 +82,7 @@ public class GulliversBlocksFabric implements ModInitializer {
             }
         });
 
+        NeoForgeConfigRegistry.INSTANCE.register(GulliversBlocks.MOD_ID, ModConfig.Type.SERVER,GulliversBlocksConfig.SERVER_SPEC);
     }
 
     InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {

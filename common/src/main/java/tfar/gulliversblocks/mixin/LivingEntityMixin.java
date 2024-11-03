@@ -29,11 +29,12 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
 
     @Override
     public void gulliversBlocks$setGulliverScale(int gulliverScale) {
-        if (!this.level().isClientSide) {
-            GulliversBlocks.onGulliverScaleChange((LivingEntity) (Object)this,gulliversBlocks$gulliverScale,gulliverScale);
+        if (gulliverScale != gulliversBlocks$gulliverScale) {
+            if (!this.level().isClientSide) {
+                GulliversBlocks.onGulliverScaleChange((LivingEntity) (Object) this, gulliversBlocks$gulliverScale, gulliverScale);
+            }
+            this.gulliversBlocks$gulliverScale = gulliverScale;
         }
-        this.gulliversBlocks$gulliverScale = gulliverScale;
-
     }
 
     @Inject(method = "readAdditionalSaveData",at = @At("HEAD"))
