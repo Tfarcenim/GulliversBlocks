@@ -116,6 +116,9 @@ public class GulliversBlocks {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
             }
         }
+        if (living.getHealth() > living.getHealth()) {
+            living.setHealth(living.getMaxHealth());
+        }
     }
 
     public static void addAttributeSafely(LivingEntity entity, Holder<Attribute> attribute, AttributeModifier modifier) {

@@ -21,7 +21,7 @@ dependencies {
         exclude group: "net.fabricmc.fabric-api"
     })
 
-    api "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:$neoforge_config_api_version"
+    modImplementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:$neoforge_config_api_version"
 
 }
 

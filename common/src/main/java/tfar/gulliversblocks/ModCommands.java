@@ -3,15 +3,24 @@ package tfar.gulliversblocks;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ModCommands {
 
@@ -38,6 +47,79 @@ public class ModCommands {
         if (entity instanceof Player player) {
             list.add(Component.literal("Block reach: "+ player.blockInteractionRange()));
         }
+        if (scale != 0) {
+            list.add(Component.empty());
+            list.add(Component.literal("Gulliver's Blocks Modifiers"));
+
+
+
+        //    list.add(Component.literal("Max Health: x" + (1 + entity.getAttribute(Attributes.MAX_HEALTH).getModifier(GulliversBlocks.MODIFIER_ID).amount())).append(" ")
+        //            .append("Scaling: "+ GulliversBlocksConfig.Server.MAX_HEALTH_SCALING.get()));
+
+            addModifierTooltip(list::add,entity,Attributes.MAX_HEALTH,entity.getAttribute(Attributes.MAX_HEALTH).getModifier(GulliversBlocks.MODIFIER_ID));
+            addModifierTooltip(list::add,entity,Attributes.ATTACK_DAMAGE,entity.getAttribute(Attributes.ATTACK_DAMAGE).getModifier(GulliversBlocks.MODIFIER_ID));
+            if (entity instanceof Player) {
+                addModifierTooltip(list::add, entity, Attributes.BLOCK_BREAK_SPEED, entity.getAttribute(Attributes.BLOCK_BREAK_SPEED).getModifier(GulliversBlocks.MODIFIER_ID));
+            }
+
+        }
         return list;
     }
+
+    private static void addModifierTooltip(Consumer<Component> pTooltipAdder, LivingEntity pPlayer, Holder<Attribute> pAttribute, AttributeModifier pModfier) {
+        double d0 = pModfier.amount();
+        boolean flag = false;
+        if (pPlayer != null) {
+            if (pModfier.is(Item.BASE_ATTACK_DAMAGE_ID)) {
+                d0 += pPlayer.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
+                flag = true;
+            } else if (pModfier.is(Item.BASE_ATTACK_SPEED_ID)) {
+                d0 += pPlayer.getAttributeBaseValue(Attributes.ATTACK_SPEED);
+                flag = true;
+            }
+        }
+
+        double d1;
+        if (pModfier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE
+                || pModfier.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL) {
+            d1 = d0 * 100.0;
+        } else if (pAttribute.is(Attributes.KNOCKBACK_RESISTANCE)) {
+            d1 = d0 * 10.0;
+        } else {
+            d1 = d0;
+        }
+
+        if (flag) {
+            pTooltipAdder.accept(
+                    CommonComponents.space()
+                            .append(
+                                    Component.translatable(
+                                            "attribute.modifier.equals." + pModfier.operation().id(),
+                                            ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(d1),
+                                            Component.translatable(pAttribute.value().getDescriptionId())
+                                    )
+                            )
+                            .withStyle(ChatFormatting.DARK_GREEN)
+            );
+        } else if (d0 > 0.0) {
+            pTooltipAdder.accept(
+                    Component.translatable(
+                                    "attribute.modifier.plus." + pModfier.operation().id(),
+                                    ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(d1),
+                                    Component.translatable(pAttribute.value().getDescriptionId())
+                            )
+                            .withStyle(pAttribute.value().getStyle(true))
+            );
+        } else if (d0 < 0.0) {
+            pTooltipAdder.accept(
+                    Component.translatable(
+                                    "attribute.modifier.take." + pModfier.operation().id(),
+                                    ItemAttributeModifiers.ATTRIBUTE_MODIFIER_FORMAT.format(-d1),
+                                    Component.translatable(pAttribute.value().getDescriptionId())
+                            )
+                            .withStyle(pAttribute.value().getStyle(false))
+            );
+        }
+    }
+
 }
