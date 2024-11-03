@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.apache.commons.lang3.tuple.Pair;
-import tfar.gulliversblocks.DankPacketHandlerNeoForge;
+import tfar.gulliversblocks.PacketHandlerNeoForge;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.network.C2SModPacket;
 import tfar.gulliversblocks.network.S2CModPacket;
@@ -62,12 +62,12 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
     @Override
     public void sendToClient(S2CModPacket<?> msg, ServerPlayer player) {
-        DankPacketHandlerNeoForge.sendToClient(msg, player);
+        PacketHandlerNeoForge.sendToClient(msg, player);
     }
 
     @Override
     public void sendToServer(C2SModPacket msg) {
-        DankPacketHandlerNeoForge.sendToServer(msg);
+        PacketHandlerNeoForge.sendToServer(msg);
     }
 
 }

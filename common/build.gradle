@@ -23,6 +23,7 @@ dependencies {
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 
     compileOnly "com.github.Virtuoel:Pehkui:$pehkui-1.21-neoforge"
+    compileOnly "dev.architectury:architectury-neoforge:$architectury_version"
 }
 
 configurations {

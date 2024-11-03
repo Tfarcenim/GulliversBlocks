@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import tfar.gulliversblocks.client.ModClient;
-import tfar.gulliversblocks.client.ModClientFabric;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixinFabric {

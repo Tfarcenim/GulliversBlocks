@@ -12,6 +12,7 @@ public class GulliversBlocksNeoForge {
     public GulliversBlocksNeoForge(IEventBus eventBus) {
         eventBus.addListener(this::register);
         eventBus.addListener(ModDatagen::gather);
+        eventBus.addListener(PacketHandlerNeoForge::register);
         // This method is invoked by the NeoForge mod loader when it is ready
         // to load your mod. You can access NeoForge and Common code in this
         // project.

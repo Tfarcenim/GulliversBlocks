@@ -1,5 +1,7 @@
 package tfar.gulliversblocks;
 
+import dev.architectury.event.EventResult;
+import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,6 +48,14 @@ public class GulliversBlocks {
         // we have an interface in the common code and use a loader specific implementation to delegate our call to
         // the platform specific approach.
         GulliverScales.addScales();
+        InteractionEvent.FARMLAND_TRAMPLE.register((world, pos, state, distance, entity) -> {
+            if (entity instanceof LivingEntity living) {
+                if (living.getDimensions(living.getPose()).height() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
+                    return EventResult.interruptFalse();
+                }
+            }
+            return EventResult.pass();
+        });
     }
 
     public static void register() {
@@ -56,6 +66,7 @@ public class GulliversBlocks {
     public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1/16d;
     public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1/16d;
     public static final double PRESSURE_PLATE_SIZE = 1.8 * 1/16d;
+    public static final double VISIBILITY_RATIO = 16;
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
     public static final ResourceLocation MINING_SPEED = GulliversBlocks.id("mining_speed");

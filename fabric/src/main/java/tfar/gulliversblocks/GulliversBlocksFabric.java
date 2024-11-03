@@ -6,17 +6,25 @@ import dev.architectury.event.events.common.InteractionEvent;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
+import tfar.gulliversblocks.events.LivingWaterCallbacks;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.PacketHandler;
 
@@ -63,14 +71,14 @@ public class GulliversBlocksFabric implements ModInitializer {
         GulliversBlocks.init();
         PacketHandler.registerPackets();
         UseEntityCallback.EVENT.register(this::interact);
-        InteractionEvent.FARMLAND_TRAMPLE.register((world, pos, state, distance, entity) -> {
-            if (entity instanceof LivingEntity living) {
-                if (living.getDimensions(living.getPose()).height() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
-                    return EventResult.interruptFalse();
-                }
+
+        LivingWaterCallbacks.BREATHING.register((entity, result) -> {
+            if(entity.level().isRainingAt(entity.blockPosition()) && entity.getDimensions(entity.getPose()).height() <= GulliversBlocks.DROWN_IN_RAIN_SIZE &&
+                    entity.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && !(MobEffectUtil.hasWaterBreathing(entity) || entity.canBreatheUnderwater())) {
+                result.setCanBreathe(false);
             }
-            return EventResult.pass();
         });
+
     }
 
     InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
@@ -106,6 +114,53 @@ public class GulliversBlocksFabric implements ModInitializer {
             return InteractionResult.sidedSuccess(world.isClientSide);
         }
         return InteractionResult.PASS;
+    }
+
+    //fabric implementation of neoforge event, see CommonHooks
+    public static void onLivingBreathe(LivingEntity entity, int consumeAirAmount, int refillAirAmount) {
+        // Check things that vanilla considers to be air - these will cause the air supply to be increased.
+        boolean isAir = !entity.isEyeInFluid(FluidTags.WATER)  || entity.level().getBlockState(BlockPos.containing(entity.getX(), entity.getEyeY(), entity.getZ())).is(Blocks.BUBBLE_COLUMN);
+        boolean canBreathe = isAir;
+        // The following effects cause the entity to not drown, but do not cause the air supply to be increased.
+        if (!isAir && (MobEffectUtil.hasWaterBreathing(entity) || entity.canBreatheUnderwater() || entity instanceof Player player && player.getAbilities().invulnerable)) {
+            canBreathe = true;
+            refillAirAmount = 0;
+        }
+       // LivingBreatheEvent breatheEvent = new LivingBreatheEvent(entity, canBreathe, consumeAirAmount, refillAirAmount);
+
+        LivingWaterCallbacks.BreathResult breathResult = new LivingWaterCallbacks.BreathResult(canBreathe,consumeAirAmount,refillAirAmount);
+
+        LivingWaterCallbacks.BREATHING.invoker().onBreath(entity, breathResult);
+
+        //NeoForge.EVENT_BUS.post(breatheEvent);
+        if (breathResult.isCanBreathe()) {
+            entity.setAirSupply(Math.min(entity.getAirSupply() + breathResult.getRefillAirAmount(), entity.getMaxAirSupply()));
+        } else {
+            entity.setAirSupply(entity.getAirSupply() - breathResult.getConsumeAirAmount());
+        }
+
+        if (entity.getAirSupply() <= 0) {
+            LivingWaterCallbacks.DrownResult drownResult = new LivingWaterCallbacks.DrownResult( entity.getAirSupply() <= -20, 2.0F, 8);
+            LivingWaterCallbacks.DROWNING.invoker().onDrown(entity,drownResult);
+            //LivingDrownEvent drownEvent = new LivingDrownEvent(entity);
+            if (drownResult.isDrowning()) {
+                entity.setAirSupply(0);
+                Vec3 vec3 = entity.getDeltaMovement();
+
+                for (int i = 0; i < drownResult.getBubbleCount(); ++i) {
+                    double d2 = entity.getRandom().nextDouble() - entity.getRandom().nextDouble();
+                    double d3 = entity.getRandom().nextDouble() - entity.getRandom().nextDouble();
+                    double d4 = entity.getRandom().nextDouble() - entity.getRandom().nextDouble();
+                    entity.level().addParticle(ParticleTypes.BUBBLE, entity.getX() + d2, entity.getY() + d3, entity.getZ() + d4, vec3.x, vec3.y, vec3.z);
+                }
+
+                if (drownResult.getDamageAmount() > 0) entity.hurt(entity.damageSources().drown(), drownResult.getDamageAmount());
+            }
+        }
+
+        if (!isAir && !entity.level().isClientSide && entity.isPassenger() && entity.getVehicle() != null && entity.getVehicle().dismountsUnderwater()) {
+            entity.stopRiding();
+        }
     }
 
 }

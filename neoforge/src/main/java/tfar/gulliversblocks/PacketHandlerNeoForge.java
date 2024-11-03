@@ -7,7 +7,7 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import tfar.gulliversblocks.network.PacketHandler;
 import tfar.gulliversblocks.platform.NeoForgePlatformHelper;
 
-public class DankPacketHandlerNeoForge {
+public class PacketHandlerNeoForge {
 
     public static void register(RegisterPayloadHandlersEvent event){
         NeoForgePlatformHelper.registrar = event.registrar(GulliversBlocks.MOD_ID);
