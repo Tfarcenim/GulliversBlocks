@@ -5,6 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,6 +16,8 @@ import tfar.gulliversblocks.LivingEntityDuck;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements LivingEntityDuck {
+    @Shadow public abstract void push(Entity pEntity);
+
     @Unique
     int gulliversBlocks$gulliverScale;
 
@@ -45,5 +48,10 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
     @Inject(method = "addAdditionalSaveData",at = @At("HEAD"))
     private void save(CompoundTag pCompound, CallbackInfo ci){
         pCompound.putInt("gulliver_scale",gulliversBlocks$gulliverScale);
+    }
+
+    @Inject(method = "doPush",at = @At("RETURN"))
+    private void onPushed(Entity pushed, CallbackInfo ci) {
+        GulliversBlocks.onPushed((LivingEntity) (Object)this,pushed);
     }
 }

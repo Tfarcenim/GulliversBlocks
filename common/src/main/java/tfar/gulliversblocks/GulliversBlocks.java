@@ -10,6 +10,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.HumanoidArm;
@@ -19,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -87,6 +90,8 @@ public class GulliversBlocks {
     public static final double PRESSURE_PLATE_SIZE = 1.8 * 1 / 16d;
     public static final double CACTUS_PRICK_SIZE = 1.8 * 1 / 16d;
     public static final double CLIMB_LEAVES_SIZE = 1.8 * 1 / 16d;
+    public static final double TRAMPLE_RATIO = 6;
+    public static final double PAPER_FLOAT_SIZE = 1.8 * 1/16d;
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
     public static final ResourceLocation MODIFIER_ID = GulliversBlocks.id("attribute_modifier");
@@ -136,6 +141,12 @@ public class GulliversBlocks {
         }
         if (living.getHealth() > living.getHealth()) {
             living.setHealth(living.getMaxHealth());
+        }
+    }
+
+    public static void tickPlayer(Player player) {
+        if (!player.level().isClientSide &&player.getBbHeight() <= PAPER_FLOAT_SIZE && (player.getMainHandItem().is(Items.PAPER) || player.getOffhandItem().is(Items.PAPER))) {
+            player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING,5,0,false,false));
         }
     }
 
@@ -245,11 +256,7 @@ public class GulliversBlocks {
             }
         }
 
-        EntityDimensions playerDimensions = player.getDimensions(player.getPose());
-        EntityDimensions entityDimensions = entity.getDimensions(entity.getPose());
-        double playerVolume = playerDimensions.height() * playerDimensions.width() * playerDimensions.width();
-        double entityVolume = entityDimensions.height() * entityDimensions.width() * entityDimensions.width();
-        double ratio = playerVolume / entityVolume;
+        double ratio = getRatio(player, entity);
 
         return ratio >= 6;
     }
@@ -342,5 +349,22 @@ public class GulliversBlocks {
             return true;
         }
         return false;
+    }
+
+    public static double getRatio(Entity entity1,Entity entity2) {
+        EntityDimensions entityDimensions1 = entity1.getDimensions(entity1.getPose());
+        EntityDimensions entityDimensions = entity2.getDimensions(entity2.getPose());
+        double entity1Volume = entityDimensions1.height() * entityDimensions1.width() * entityDimensions1.width();
+        double entity2Volume = entityDimensions.height() * entityDimensions.width() * entityDimensions.width();
+        return entity1Volume / entity2Volume;
+    }
+
+    public static void onPushed(LivingEntity pusher,Entity pushed) {
+        if (!pushed.isPassenger() && pushed instanceof LivingEntity livingPushed) {
+            double ratio = getRatio(pusher,pushed);
+            if (ratio >= TRAMPLE_RATIO) {
+                livingPushed.hurt(livingPushed.damageSources().cramming(), 2);
+            }
+        }
     }
 }
