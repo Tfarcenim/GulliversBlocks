@@ -2,11 +2,14 @@ package tfar.gulliversblocks;
 
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.HumanoidArm;
@@ -16,11 +19,16 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
+import tfar.gulliversblocks.init.ModDamageTypes;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
@@ -52,7 +60,7 @@ public class GulliversBlocks {
         GulliverScales.addScales();
         InteractionEvent.FARMLAND_TRAMPLE.register((world, pos, state, distance, entity) -> {
             if (entity instanceof LivingEntity living) {
-                if (living.getDimensions(living.getPose()).height() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
+                if (living.getBbHeight() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
                     return EventResult.interruptFalse();
                 }
             }
@@ -68,7 +76,7 @@ public class GulliversBlocks {
     public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1/16d;
     public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1/16d;
     public static final double PRESSURE_PLATE_SIZE = 1.8 * 1/16d;
-    public static final double VISIBILITY_RATIO = 16;
+    public static final double CACTUS_PRICK_SIZE = 1.8 * 1/16d;
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
     public static final ResourceLocation MODIFIER_ID = GulliversBlocks.id("attribute_modifier");
@@ -275,5 +283,27 @@ public class GulliversBlocks {
         thrown.xRotO = thrown.getXRot();
     }
 
+    public static double getVisibilityMultiplier(LivingEntity entity, @Nullable Entity lookingEntity) {
+        double m = GulliverScales.SCALES.get(LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale());
+     //   if (lookingEntity != null) {
+
+  //      }
+        return m;
+    }
+
+    public static boolean conditionalImmunity(Entity entity, DamageSource damageSource,boolean vanillaImmune) {
+        if (damageSource.is(DamageTypes.CACTUS) && entity.getBbHeight() <= CACTUS_PRICK_SIZE){
+            return true;
+        }
+        return vanillaImmune;
+    }
+
+    public static void onInsideBlock(BlockBehaviour block, BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
+        if (block == Blocks.ROSE_BUSH) {
+            if (pEntity.getBbHeight() <= CACTUS_PRICK_SIZE) {
+                pEntity.hurt(pLevel.damageSources().source(ModDamageTypes.ROSE), 1.0F);
+            }
+        }
+    }
 
 }

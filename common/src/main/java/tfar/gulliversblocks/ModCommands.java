@@ -51,19 +51,18 @@ public class ModCommands {
             list.add(Component.empty());
             list.add(Component.literal("Gulliver's Blocks Modifiers"));
 
-
-
-        //    list.add(Component.literal("Max Health: x" + (1 + entity.getAttribute(Attributes.MAX_HEALTH).getModifier(GulliversBlocks.MODIFIER_ID).amount())).append(" ")
-        //            .append("Scaling: "+ GulliversBlocksConfig.Server.MAX_HEALTH_SCALING.get()));
-
-            addModifierTooltip(list::add,entity,Attributes.MAX_HEALTH,entity.getAttribute(Attributes.MAX_HEALTH).getModifier(GulliversBlocks.MODIFIER_ID));
-            addModifierTooltip(list::add,entity,Attributes.ATTACK_DAMAGE,entity.getAttribute(Attributes.ATTACK_DAMAGE).getModifier(GulliversBlocks.MODIFIER_ID));
+            addModifier(list::add,entity,Attributes.MAX_HEALTH);
+            addModifier(list::add,entity,Attributes.ATTACK_DAMAGE);
             if (entity instanceof Player) {
-                addModifierTooltip(list::add, entity, Attributes.BLOCK_BREAK_SPEED, entity.getAttribute(Attributes.BLOCK_BREAK_SPEED).getModifier(GulliversBlocks.MODIFIER_ID));
+                addModifier(list::add, entity, Attributes.BLOCK_BREAK_SPEED);
             }
 
         }
         return list;
+    }
+
+    static void addModifier(Consumer<Component> pTooltipAdder, LivingEntity pPlayer, Holder<Attribute> pAttribute) {
+        addModifierTooltip(pTooltipAdder,pPlayer,pAttribute,pPlayer.getAttribute(pAttribute).getModifier(GulliversBlocks.MODIFIER_ID));
     }
 
     private static void addModifierTooltip(Consumer<Component> pTooltipAdder, LivingEntity pPlayer, Holder<Attribute> pAttribute, AttributeModifier pModfier) {

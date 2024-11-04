@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -22,6 +23,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.GulliversBlocksFabric;
 
 import java.util.Optional;
@@ -81,6 +85,15 @@ public abstract class LivingEntityMixinFabric extends Entity {
 
     public LivingEntityMixinFabric(EntityType<?> entityType, Level level) {
         super(entityType, level);
+    }
+
+    @Inject(method = "isInvulnerableTo",at = @At("RETURN"),cancellable = true)
+    private void conditionalImmunity(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+        boolean vanillaImmunity = cir.getReturnValue();
+        boolean moddedImmunity = GulliversBlocks.conditionalImmunity(this,source,vanillaImmunity);
+        if (vanillaImmunity != moddedImmunity) {
+            cir.setReturnValue(moddedImmunity);
+        }
     }
 
     /**
@@ -176,4 +189,8 @@ public abstract class LivingEntityMixinFabric extends Entity {
         this.level().getProfiler().pop();
     }
 
+    @ModifyVariable(method = "getVisibilityPercent",at = @At("RETURN"))
+    private double modifyVisibility(double original,@Nullable Entity lookingEntity) {
+        return original * GulliversBlocks.getVisibilityMultiplier((LivingEntity)(Object)this,lookingEntity);
+    }
 }

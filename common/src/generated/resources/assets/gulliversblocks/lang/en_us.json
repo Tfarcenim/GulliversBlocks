@@ -1,4 +1,6 @@
 {
+  "death.attack.rose": "%1$s was pricked to death",
+  "death.attack.rose.player": "%1$s walked into a rose bush while trying to escape %2$s",
   "effect.gulliversblocks.downsize": "Downsize",
   "effect.gulliversblocks.renewal": "Renewal",
   "effect.gulliversblocks.upsize": "Upsize",

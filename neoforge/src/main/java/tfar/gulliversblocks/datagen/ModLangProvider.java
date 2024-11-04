@@ -43,6 +43,8 @@ public class ModLangProvider extends LanguageProvider {
         addPotion(ModPotions.DOWNSIZE_V,"Potion of Downsizing V");
 
         addPotion(ModPotions.RENEWAL,"Potion of Renewal");
+        add("death.attack.rose",  "%1$s was pricked to death");
+        add( "death.attack.rose.player", "%1$s walked into a rose bush while trying to escape %2$s");
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

@@ -76,7 +76,7 @@ public class GulliversBlocksFabric implements ModInitializer {
         UseEntityCallback.EVENT.register(this::interact);
 
         LivingWaterCallbacks.BREATHING.register((entity, result) -> {
-            if(entity.level().isRainingAt(entity.blockPosition()) && entity.getDimensions(entity.getPose()).height() <= GulliversBlocks.DROWN_IN_RAIN_SIZE &&
+            if(entity.level().isRainingAt(entity.blockPosition()) && entity.getBbHeight() <= GulliversBlocks.DROWN_IN_RAIN_SIZE &&
                     entity.getItemBySlot(EquipmentSlot.HEAD).isEmpty() && !(MobEffectUtil.hasWaterBreathing(entity) || entity.canBreatheUnderwater())) {
                 result.setCanBreathe(false);
             }
