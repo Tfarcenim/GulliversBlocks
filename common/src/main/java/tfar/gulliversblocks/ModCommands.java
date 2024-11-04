@@ -1,15 +1,18 @@
 package tfar.gulliversblocks;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -19,6 +22,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -26,14 +30,94 @@ public class ModCommands {
 
     public static void dispatcher(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(GulliversBlocks.MOD_ID)
-                .then(Commands.literal("debug").executes(ModCommands::getInfo)));
+                .then(Commands.literal("debug").executes(ModCommands::getInfo))
+                .then(Commands.literal("scale").requires(commandSourceStack -> commandSourceStack.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .then(Commands.literal("up")
+                                .then(Commands.argument("targets", EntityArgument.entities())
+                                        .then(Commands.argument("scales", IntegerArgumentType.integer())
+                                                .executes(ModCommands::scaleUp))
+                                )
+                        )
+                        .then(Commands.literal("down")
+                                .then(Commands.argument("targets", EntityArgument.entities())
+                                        .then(Commands.argument("scales", IntegerArgumentType.integer())
+                                                .executes(ModCommands::scaleDown))
+                                )
+                        )
+                        .then(Commands.literal("set")
+                                .then(Commands.argument("targets", EntityArgument.entities())
+                                        .then(Commands.argument("scales", IntegerArgumentType.integer(GulliverScales.min(),GulliverScales.max()))
+                                                .executes(ModCommands::scaleSet))
+                                )
+                        )
+                        .then(Commands.literal("reset")
+                                .then(Commands.argument("targets", EntityArgument.entities())
+                                        .executes(ModCommands::scaleReset))
+                        )
+                )
+        );
+    }
+
+    static int scaleUp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+        int scale = IntegerArgumentType.getInteger(ctx, "scales");
+        int i = scale(entities, scale);
+        return i;
+    }
+
+    static int scaleDown(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+        int scale = IntegerArgumentType.getInteger(ctx, "scales");
+        int i = scale(entities, -scale);
+        return i;
+    }
+
+    static int scaleSet(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+        int scale = IntegerArgumentType.getInteger(ctx, "scales");
+        int i = setScale(entities, scale);
+        return i;
+    }
+
+    static int scaleReset(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<? extends Entity> entities = EntityArgument.getEntities(ctx, "targets");
+        int i = setScale(entities, 0);
+        return i;
+    }
+
+    static int scale(Collection<? extends Entity> entities, int scale) {
+        int i = 0;
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity living) {
+                int originalScale = LivingEntityDuck.of(living).gulliversBlocks$getGulliverScale();
+                int newScale = originalScale + scale;
+                if (newScale >= GulliverScales.min() && newScale <= GulliverScales.max()) {
+                    LivingEntityDuck.of(living).gulliversBlocks$setGulliverScale(newScale);
+                    i++;
+                }
+            }
+        }
+        return i;
+    }
+
+    static int setScale(Collection<? extends Entity> entities, int scale) {
+        int i = 0;
+        for (Entity entity : entities) {
+            if (entity instanceof LivingEntity living) {
+                if (scale >= GulliverScales.min() && scale <= GulliverScales.max()) {
+                    LivingEntityDuck.of(living).gulliversBlocks$setGulliverScale(scale);
+                    i++;
+                }
+            }
+        }
+        return i;
     }
 
     private static int getInfo(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         ServerPlayer player = source.getPlayerOrException();
         List<Component> components = createInfo(player);
-        components.forEach(component -> source.sendSuccess(() -> component,false));
+        components.forEach(component -> source.sendSuccess(() -> component, false));
         return 1;
     }
 
@@ -41,18 +125,18 @@ public class ModCommands {
         List<Component> list = new ArrayList<>();
         list.add(Component.empty().append("Gulliver Stats for ").append(entity.getDisplayName()));
         int scale = LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale();
-        list.add(Component.literal("Gulliver Scale: "+ scale));
+        list.add(Component.literal("Gulliver Scale: " + scale));
         double absoluteScale = GulliverScales.SCALES.get(scale);
-        list.add(Component.literal("Absolute Scale: "+absoluteScale));
+        list.add(Component.literal("Absolute Scale: " + absoluteScale));
         if (entity instanceof Player player) {
-            list.add(Component.literal("Block reach: "+ player.blockInteractionRange()));
+            list.add(Component.literal("Block reach: " + player.blockInteractionRange()));
         }
         if (scale != 0) {
             list.add(Component.empty());
             list.add(Component.literal("Gulliver's Blocks Modifiers"));
 
-            addModifier(list::add,entity,Attributes.MAX_HEALTH);
-            addModifier(list::add,entity,Attributes.ATTACK_DAMAGE);
+            addModifier(list::add, entity, Attributes.MAX_HEALTH);
+            addModifier(list::add, entity, Attributes.ATTACK_DAMAGE);
             if (entity instanceof Player) {
                 addModifier(list::add, entity, Attributes.BLOCK_BREAK_SPEED);
             }
@@ -62,7 +146,7 @@ public class ModCommands {
     }
 
     static void addModifier(Consumer<Component> pTooltipAdder, LivingEntity pPlayer, Holder<Attribute> pAttribute) {
-        addModifierTooltip(pTooltipAdder,pPlayer,pAttribute,pPlayer.getAttribute(pAttribute).getModifier(GulliversBlocks.MODIFIER_ID));
+        addModifierTooltip(pTooltipAdder, pPlayer, pAttribute, pPlayer.getAttribute(pAttribute).getModifier(GulliversBlocks.MODIFIER_ID));
     }
 
     private static void addModifierTooltip(Consumer<Component> pTooltipAdder, LivingEntity pPlayer, Holder<Attribute> pAttribute, AttributeModifier pModfier) {

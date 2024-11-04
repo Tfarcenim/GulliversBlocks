@@ -1,10 +1,9 @@
 package tfar.gulliversblocks;
 
-import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.InteractionEvent;
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
 import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
 import net.minecraft.core.BlockPos;
@@ -44,6 +43,7 @@ public class GulliversBlocksFabric implements ModInitializer {
 
         GulliversBlocks.register();
         CommandRegistrationEvent.EVENT.register((dispatcher, registry, selection) -> ModCommands.dispatcher(dispatcher));
+        ServerPlayerEvents.COPY_FROM.register(GulliversBlocks::copyFrom);
         FabricBrewingRecipeRegistryBuilder.BUILD.register(builder -> {
             builder.addMix(Potions.STRENGTH, Items.BONE_MEAL,ModPotions.UPSIZE_II);
             builder.addMix(Potions.WEAKNESS, Items.WIND_CHARGE,ModPotions.DOWNSIZE_II);

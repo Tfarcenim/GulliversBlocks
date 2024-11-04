@@ -19,18 +19,27 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.init.ModDamageTypes;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
+import tfar.gulliversblocks.init.ModTags;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
@@ -73,10 +82,11 @@ public class GulliversBlocks {
         ModPotions.boot();
     }
 
-    public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1/16d;
-    public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1/16d;
-    public static final double PRESSURE_PLATE_SIZE = 1.8 * 1/16d;
-    public static final double CACTUS_PRICK_SIZE = 1.8 * 1/16d;
+    public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1 / 16d;
+    public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1 / 16d;
+    public static final double PRESSURE_PLATE_SIZE = 1.8 * 1 / 16d;
+    public static final double CACTUS_PRICK_SIZE = 1.8 * 1 / 16d;
+    public static final double CLIMB_LEAVES_SIZE = 1.8 * 1 / 16d;
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
     public static final ResourceLocation MODIFIER_ID = GulliversBlocks.id("attribute_modifier");
@@ -111,14 +121,14 @@ public class GulliversBlocks {
                 if (living instanceof Player player) {
                     //multiplying by -1 is 0
                     double speedModifier = Server.BLOCK_BREAK_SPEED_SCALING.get().function.applyAsDouble(gulliverScale);
-                    addAttributeMultSafely(player,Attributes.BLOCK_BREAK_SPEED,speedModifier);
+                    addAttributeMultSafely(player, Attributes.BLOCK_BREAK_SPEED, speedModifier);
                 }
 
                 double maxHealthModifier = Math.max(Server.MINIMUM_MAX_HEALTH_SCALE.get(), Server.MAX_HEALTH_SCALING.get().function.applyAsDouble(gulliverScale));
-                addAttributeMultSafely(living,Attributes.MAX_HEALTH,maxHealthModifier);
+                addAttributeMultSafely(living, Attributes.MAX_HEALTH, maxHealthModifier);
 
                 double attackDamageModifier = Server.ATTACK_DAMAGE_SCALING.get().function.applyAsDouble(gulliverScale);
-                addAttributeMultSafely(living,Attributes.ATTACK_DAMAGE,attackDamageModifier);
+                addAttributeMultSafely(living, Attributes.ATTACK_DAMAGE, attackDamageModifier);
 
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
@@ -127,6 +137,14 @@ public class GulliversBlocks {
         if (living.getHealth() > living.getHealth()) {
             living.setHealth(living.getMaxHealth());
         }
+    }
+
+    public static void copyFrom(ServerPlayer oldPlayer,ServerPlayer newPlayer,boolean alive) {
+        LivingEntityDuck oldPlayerDuck = LivingEntityDuck.of(oldPlayer);
+        LivingEntityDuck newPlayerDuck = LivingEntityDuck.of(newPlayer);
+
+        newPlayerDuck.gulliversBlocks$setGulliverScale(oldPlayerDuck.gulliversBlocks$getGulliverScale());
+
     }
 
     public static void addAttributeSafely(LivingEntity entity, Holder<Attribute> attribute, AttributeModifier modifier) {
@@ -140,12 +158,12 @@ public class GulliversBlocks {
         }
     }
 
-    public static void addAttributeMultSafely(LivingEntity entity, Holder<Attribute> attribute,double value) {
-        addAttributeSafely(entity,attribute,new AttributeModifier(MODIFIER_ID,value - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+    public static void addAttributeMultSafely(LivingEntity entity, Holder<Attribute> attribute, double value) {
+        addAttributeSafely(entity, attribute, new AttributeModifier(MODIFIER_ID, value - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
 
     }
 
-    public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick,MountPosition mountPosition) {
+    public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick, MountPosition mountPosition) {
 
         switch (mountPosition) {
             case LEFT_SHOULDER -> {
@@ -185,7 +203,7 @@ public class GulliversBlocks {
                         .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
             }
         }
-        throw new RuntimeException("Unexpected mountpos:" +mountPosition);
+        throw new RuntimeException("Unexpected mountpos:" + mountPosition);
     }
 
     public static ResourceLocation id(String path) {
@@ -244,18 +262,18 @@ public class GulliversBlocks {
 
         if (mount2 != null) {
             mounts.put(pos1, mount2);
-            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos1,mount2),player);
+            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos1, mount2), player);
         } else {
             mounts.remove(pos1);
-            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos1),player);
+            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos1), player);
         }
 
         if (mount1 != null) {
             mounts.put(pos2, mount1);
-            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos2,mount1),player);
+            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos2, mount1), player);
         } else {
             mounts.remove(pos2);
-            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos2),player);
+            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos2), player);
         }
     }
 
@@ -263,7 +281,7 @@ public class GulliversBlocks {
         float f = -Mth.sin(pY * (float) (Math.PI / 180.0)) * Mth.cos(pX * (float) (Math.PI / 180.0));
         float f1 = -Mth.sin((pX + pZ) * (float) (Math.PI / 180.0));
         float f2 = Mth.cos(pY * (float) (Math.PI / 180.0)) * Mth.cos(pX * (float) (Math.PI / 180.0));
-        shoot(thrown,f, f1, f2, pVelocity);
+        shoot(thrown, f, f1, f2, pVelocity);
         Vec3 vec3 = pShooter.getKnownMovement();
         thrown.setDeltaMovement(thrown.getDeltaMovement().add(vec3.x, pShooter.onGround() ? 0.0 : vec3.y, vec3.z));
     }
@@ -272,27 +290,27 @@ public class GulliversBlocks {
     /**
      * Similar to setArrowHeading, it's point the throwable entity to a x, y, z direction.
      */
-    public static void shoot(Entity thrown,double pX, double pY, double pZ, float pVelocity) {
+    public static void shoot(Entity thrown, double pX, double pY, double pZ, float pVelocity) {
         Vec3 vec3 = new Vec3(pX, pY, pZ).normalize().scale(pVelocity);
         thrown.setDeltaMovement(vec3);
         thrown.hasImpulse = true;
         double d0 = vec3.horizontalDistance();
-        thrown.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
-        thrown.setXRot((float)(Mth.atan2(vec3.y, d0) * 180.0F / (float)Math.PI));
+        thrown.setYRot((float) (Mth.atan2(vec3.x, vec3.z) * 180.0F / (float) Math.PI));
+        thrown.setXRot((float) (Mth.atan2(vec3.y, d0) * 180.0F / (float) Math.PI));
         thrown.yRotO = thrown.getYRot();
         thrown.xRotO = thrown.getXRot();
     }
 
     public static double getVisibilityMultiplier(LivingEntity entity, @Nullable Entity lookingEntity) {
         double m = GulliverScales.SCALES.get(LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale());
-     //   if (lookingEntity != null) {
+        //   if (lookingEntity != null) {
 
-  //      }
+        //      }
         return m;
     }
 
-    public static boolean conditionalImmunity(Entity entity, DamageSource damageSource,boolean vanillaImmune) {
-        if (damageSource.is(DamageTypes.CACTUS) && entity.getBbHeight() <= CACTUS_PRICK_SIZE){
+    public static boolean conditionalImmunity(Entity entity, DamageSource damageSource, boolean vanillaImmune) {
+        if (damageSource.is(DamageTypes.CACTUS) && entity.getBbHeight() <= CACTUS_PRICK_SIZE) {
             return true;
         }
         return vanillaImmune;
@@ -306,4 +324,23 @@ public class GulliversBlocks {
         }
     }
 
+    public static void onCollide(BlockBehaviour blockBehaviour, BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext, CallbackInfoReturnable<VoxelShape> cir) {
+        if (pContext instanceof EntityCollisionContext entityCollisionContext) {
+            Entity entity = entityCollisionContext.getEntity();
+            if (entity != null) {
+                if (blockBehaviour instanceof LeavesBlock) {
+                    if (entity.getBbHeight() <= CLIMB_LEAVES_SIZE) {
+                        cir.setReturnValue(Shapes.empty());
+                    }
+                }
+            }
+        }
+    }
+    public static boolean canClimb(LivingEntity living,BlockState state) {
+        Block block = state.getBlock();
+        if (living.getBbHeight() <= CLIMB_LEAVES_SIZE && state.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
+            return true;
+        }
+        return false;
+    }
 }

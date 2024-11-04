@@ -193,4 +193,18 @@ public abstract class LivingEntityMixinFabric extends Entity {
     private double modifyVisibility(double original,@Nullable Entity lookingEntity) {
         return original * GulliversBlocks.getVisibilityMultiplier((LivingEntity)(Object)this,lookingEntity);
     }
+
+    @Inject(method = "onClimbable",at = @At("RETURN"),cancellable = true)
+    private void isOnClimbable(CallbackInfoReturnable<Boolean> cir) {
+        boolean vanillaClimbable = cir.getReturnValue();
+        if (vanillaClimbable) {
+            return;
+        }
+
+        if (GulliversBlocks.canClimb((LivingEntity) (Object)this,getInBlockState())) {
+            cir.setReturnValue(true);
+        }
+
+    }
+
 }
