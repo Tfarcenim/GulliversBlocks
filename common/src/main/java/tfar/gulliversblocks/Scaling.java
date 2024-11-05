@@ -1,6 +1,7 @@
 package tfar.gulliversblocks;
 
 import it.unimi.dsi.fastutil.doubles.Double2DoubleFunction;
+import net.minecraft.util.Mth;
 
 public enum Scaling {
     NONE(d -> 1),
@@ -9,6 +10,7 @@ public enum Scaling {
     CUBE(d -> d*d*d),
     SQUARE_ROOT(Math::sqrt),
     INVERSE(d -> 1/d),
+    INVERSE_SQUARE_ROOT(Mth::fastInvSqrt),
     INVERSE_CUBE_ROOT(d -> Math.pow(d,-1/3d));
     public final Double2DoubleFunction function;
 

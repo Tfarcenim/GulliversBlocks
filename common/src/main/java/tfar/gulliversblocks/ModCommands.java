@@ -14,16 +14,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ModCommands {
@@ -135,12 +135,15 @@ public class ModCommands {
             list.add(Component.empty());
             list.add(Component.literal("Gulliver's Blocks Modifiers"));
 
-            addModifier(list::add, entity, Attributes.MAX_HEALTH);
-            addModifier(list::add, entity, Attributes.ATTACK_DAMAGE);
-            if (entity instanceof Player) {
-                addModifier(list::add, entity, Attributes.BLOCK_BREAK_SPEED);
-            }
+            AttributeMap attributeMap = entity.getAttributes();
 
+            for (Map.Entry<Holder<Attribute>, AttributeInstance> entry : attributeMap.attributes.entrySet()) {
+                Holder<Attribute> attributeHolder = entry.getKey();
+                AttributeInstance instance = entry.getValue();
+                if (instance.hasModifier(GulliversBlocks.MODIFIER_ID)) {
+                    addModifier(list::add,entity,attributeHolder);
+                }
+            }
         }
         return list;
     }

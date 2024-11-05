@@ -21,7 +21,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -133,7 +132,7 @@ public class GulliversBlocks {
                 double movementModifier = Server.MOVEMENT_SPEED_SCALING.get().function.applyAsDouble(gulliverScale);
                 addAttributeMultSafely(living, Attributes.MOVEMENT_SPEED, movementModifier);
 
-                double fallDamageScaling = Server.FALL_DAMAGE_SCALING.get().function.applyAsDouble(gulliverScale);
+                double fallDamageScaling = Server.FALL_DAMAGE_MULTIPLIER_SCALING.get().function.applyAsDouble(gulliverScale);
                 addAttributeMultSafely(living, Attributes.FALL_DAMAGE_MULTIPLIER, fallDamageScaling);
 
                 double safeFallScaling = Server.SAFE_FALL_DISTANCE_SCALING.get().function.applyAsDouble(gulliverScale);
