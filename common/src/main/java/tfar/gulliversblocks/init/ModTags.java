@@ -8,6 +8,8 @@ import tfar.gulliversblocks.GulliversBlocks;
 public class ModTags {
     public static class Blocks{
         public static final TagKey<Block> CLIMBABLE_WHEN_SMALL = mod("climbable_when_small");
+        public static final TagKey<Block> CLIMBABLE_WITH_SLIME = mod("climbable_with_slime");
+
         static TagKey<Block> mod(String path) {
             return TagKey.create(Registries.BLOCK, GulliversBlocks.id(path));
         }

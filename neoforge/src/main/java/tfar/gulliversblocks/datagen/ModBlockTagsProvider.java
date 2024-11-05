@@ -3,6 +3,7 @@ package tfar.gulliversblocks.datagen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -20,6 +21,9 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
         //    - Can climb through leaves, grass, gravel, wool, cactus, cake, cobwebs, etc. by holding shift
-        tag(ModTags.Blocks.CLIMBABLE_WHEN_SMALL).addTag(BlockTags.LEAVES).addTag(BlockTags.CANDLE_CAKES).add(Blocks.CAKE,Blocks.COBWEB,Blocks.CACTUS);
+        tag(ModTags.Blocks.CLIMBABLE_WHEN_SMALL).addTag(BlockTags.LEAVES).addTag(BlockTags.CANDLE_CAKES)
+                .addTag(BlockTags.SAND)
+                .add(Blocks.CAKE,Blocks.COBWEB,Blocks.CACTUS,Blocks.GRAVEL)
+        ;
     }
 }

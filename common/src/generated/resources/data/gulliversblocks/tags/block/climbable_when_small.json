@@ -2,8 +2,10 @@
   "values": [
     "#minecraft:leaves",
     "#minecraft:candle_cakes",
+    "#minecraft:sand",
     "minecraft:cake",
     "minecraft:cobweb",
-    "minecraft:cactus"
+    "minecraft:cactus",
+    "minecraft:gravel"
   ]
 }

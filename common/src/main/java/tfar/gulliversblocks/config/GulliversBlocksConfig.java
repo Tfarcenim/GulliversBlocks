@@ -22,13 +22,18 @@ public class GulliversBlocksConfig {
         public static ModConfigSpec.ConfigValue<Scaling> MAX_HEALTH_SCALING;
         public static ModConfigSpec.DoubleValue MINIMUM_MAX_HEALTH_SCALE;
         public static ModConfigSpec.ConfigValue<Scaling> ATTACK_DAMAGE_SCALING;
-
+        public static ModConfigSpec.ConfigValue<Scaling> MOVEMENT_SPEED_SCALING;
+        public static ModConfigSpec.ConfigValue<Scaling> FALL_DAMAGE_SCALING;
+        public static ModConfigSpec.ConfigValue<Scaling> SAFE_FALL_DISTANCE_SCALING;
         public Server(ModConfigSpec.Builder builder) {
             builder.push("scaling");
             BLOCK_BREAK_SPEED_SCALING = builder.defineEnum("player.block_break_speed",Scaling.SQUARE_ROOT);
             MAX_HEALTH_SCALING = builder.defineEnum("generic.max_health",Scaling.LINEAR);
             MINIMUM_MAX_HEALTH_SCALE = builder.defineInRange("minimum_max_health_scale",.5,0,1);
             ATTACK_DAMAGE_SCALING = builder.defineEnum("generic.attack_damage",Scaling.SQUARE_ROOT);
+            MOVEMENT_SPEED_SCALING = builder.defineEnum("generic.movement_speed",Scaling.INVERSE_CUBE_ROOT);
+            FALL_DAMAGE_SCALING = builder.defineEnum("attribute.name.generic.fall_damage_multiplier",Scaling.LINEAR);
+            SAFE_FALL_DISTANCE_SCALING = builder.defineEnum("generic.safe_fall_distance",Scaling.INVERSE);
             builder.pop();
         }
     }

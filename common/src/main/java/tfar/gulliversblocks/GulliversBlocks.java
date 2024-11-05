@@ -16,10 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
@@ -105,13 +102,11 @@ public class GulliversBlocks {
                 data.setPersistence(persist);
             }
 
-            if (living instanceof Player player) {
-                player.getAttribute(Attributes.BLOCK_BREAK_SPEED).removeModifier(MODIFIER_ID);
-            }
-
-            living.getAttribute(Attributes.MAX_HEALTH).removeModifier(MODIFIER_ID);
-            if (living.getAttribute(Attributes.ATTACK_DAMAGE) != null) {//some mobs don't have an attack damage stat
-                living.getAttribute(Attributes.ATTACK_DAMAGE).removeModifier(MODIFIER_ID);
+            AttributeMap attributes = living.getAttributes();
+            for (Map.Entry<Holder<Attribute>, AttributeInstance> entry : attributes.attributes.entrySet()) {
+                Holder<Attribute> attributeHolder = entry.getKey();
+                AttributeInstance instance = entry.getValue();
+                instance.removeModifier(MODIFIER_ID);
             }
 
         } else {
@@ -134,6 +129,15 @@ public class GulliversBlocks {
 
                 double attackDamageModifier = Server.ATTACK_DAMAGE_SCALING.get().function.applyAsDouble(gulliverScale);
                 addAttributeMultSafely(living, Attributes.ATTACK_DAMAGE, attackDamageModifier);
+
+                double movementModifier = Server.MOVEMENT_SPEED_SCALING.get().function.applyAsDouble(gulliverScale);
+                addAttributeMultSafely(living, Attributes.MOVEMENT_SPEED, movementModifier);
+
+                double fallDamageScaling = Server.FALL_DAMAGE_SCALING.get().function.applyAsDouble(gulliverScale);
+                addAttributeMultSafely(living, Attributes.FALL_DAMAGE_MULTIPLIER, fallDamageScaling);
+
+                double safeFallScaling = Server.SAFE_FALL_DISTANCE_SCALING.get().function.applyAsDouble(gulliverScale);
+                addAttributeMultSafely(living, Attributes.SAFE_FALL_DISTANCE, safeFallScaling);
 
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
@@ -344,9 +348,42 @@ public class GulliversBlocks {
         }
     }
     public static boolean canClimb(LivingEntity living,BlockState state) {
-        Block block = state.getBlock();
-        if (living.getBbHeight() <= CLIMB_LEAVES_SIZE && state.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
-            return true;
+        if (living.getBbHeight() <= CLIMB_LEAVES_SIZE) {
+            if (state.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
+                return true;
+            }
+
+            if (living.getMainHandItem().is(Items.SLIME_BALL) || living.getOffhandItem().is(Items.SLIME_BALL)) {
+                Vec3 look = living.getLookAngle();
+                Vec3 movementDirection = look.scale(.05);
+                Vec3 pred = living.position().add(movementDirection.x,0,movementDirection.z);
+                BlockPos predPos = BlockPos.containing(pred);
+                BlockState stateCollidedWith = living.level().getBlockState(predPos);
+                if (!stateCollidedWith.getCollisionShape(living.level(),predPos).isEmpty()) {
+                    return true;
+                }
+            }
+
+            if (living.horizontalCollision) {
+                Vec3 look = living.getLookAngle();
+
+
+
+                //xxa is strafe -1->1, zza is forward/backward 1->-1
+                double xxa = living.xxa;
+                double zza = living.zza;
+                Vec3 movementDirection = look.scale(zza * .05);
+
+
+              //  movementDirection = movementDirection.yRot((float) Math.asin(xxa));
+                Vec3 playerPos = living.position();
+                Vec3 pred = playerPos.add(movementDirection.x,0,movementDirection.z);
+                BlockPos predPos = BlockPos.containing(pred);
+                BlockState stateCollidedWith = living.level().getBlockState(predPos);
+                if (stateCollidedWith.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
