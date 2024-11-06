@@ -16,6 +16,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
@@ -116,6 +117,8 @@ public class GulliversBlocksFabric implements ModInitializer {
             }
 
             return InteractionResult.sidedSuccess(world.isClientSide);
+        } else if (entity instanceof Parrot parrot) {
+            player.startRiding(parrot);
         }
         return InteractionResult.PASS;
     }

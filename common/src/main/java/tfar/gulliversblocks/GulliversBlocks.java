@@ -1,5 +1,6 @@
 package tfar.gulliversblocks;
 
+import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
@@ -18,6 +19,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.FishingRodItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -74,6 +77,19 @@ public class GulliversBlocks {
             }
             return EventResult.pass();
         });
+        InteractionEvent.RIGHT_CLICK_ITEM.register((player, interactionHand) -> {
+            ItemStack stack = player.getItemInHand(interactionHand);
+            if (stack.getItem() instanceof FishingRodItem) {
+                if (player.fishing != null && GulliverScales.SCALES.get(LivingEntityDuck.of(player).gulliversBlocks$getGulliverScale()) <= FISHING_ROD_GRAPPLE_SCALE) {
+                    Vec3 playerPos = player.position();
+                    Vec3 fishingPos = player.fishing.position();
+                    Vec3 dist = fishingPos.subtract(playerPos);
+                    player.setDeltaMovement(player.getDeltaMovement().add(dist.normalize().scale(4)));
+                    player.hurtMarked = true;
+                }
+            }
+            return CompoundEventResult.pass();
+        });
     }
 
     public static void register() {
@@ -86,8 +102,10 @@ public class GulliversBlocks {
     public static final double PRESSURE_PLATE_SIZE = 1.8 * 1 / 16d;
     public static final double CACTUS_PRICK_SIZE = 1.8 * 1 / 16d;
     public static final double CLIMB_LEAVES_SIZE = 1.8 * 1 / 16d;
-    public static final double TRAMPLE_RATIO = 6;
+    public static final double TRAMPLE_RATIO = 8;
     public static final double PAPER_FLOAT_SIZE = 1.8 * 1/16d;
+    public static final double FISHING_ROD_GRAPPLE_SCALE = 1/16d;
+
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
     public static final ResourceLocation MODIFIER_ID = GulliversBlocks.id("attribute_modifier");

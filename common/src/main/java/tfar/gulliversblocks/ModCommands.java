@@ -91,7 +91,7 @@ public class ModCommands {
             if (entity instanceof LivingEntity living) {
                 int originalScale = LivingEntityDuck.of(living).gulliversBlocks$getGulliverScale();
                 int newScale = originalScale + scale;
-                if (newScale >= GulliverScales.min() && newScale <= GulliverScales.max()) {
+                if (GulliverScales.valid(newScale)) {
                     LivingEntityDuck.of(living).gulliversBlocks$setGulliverScale(newScale);
                     i++;
                 }
@@ -104,7 +104,7 @@ public class ModCommands {
         int i = 0;
         for (Entity entity : entities) {
             if (entity instanceof LivingEntity living) {
-                if (scale >= GulliverScales.min() && scale <= GulliverScales.max()) {
+                if (GulliverScales.valid(scale)) {
                     LivingEntityDuck.of(living).gulliversBlocks$setGulliverScale(scale);
                     i++;
                 }
