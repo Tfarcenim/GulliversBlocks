@@ -3,14 +3,19 @@ package tfar.gulliversblocks.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.Input;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.PlayerDuck;
 import tfar.gulliversblocks.network.C2SActionPacket;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
+import tfar.gulliversblocks.network.C2SFlightControlPacket;
 import tfar.gulliversblocks.platform.Services;
 
 import java.util.List;
@@ -85,7 +90,7 @@ public class ModClient {
     }
 
     public static void interceptKeybinds(Minecraft minecraft) {
-        Player player = minecraft.player;
+        LocalPlayer player = minecraft.player;
         if (player != null) {
             PlayerDuck playerDuck = PlayerDuck.of(player);
             Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
@@ -95,6 +100,19 @@ public class ModClient {
                         C2SActionPacket.send(C2SActionPacket.Action.SWAP_HANDS);
                     }
                 }
+            }
+            if (player.getVehicle() instanceof Parrot parrot) {
+                Input input = player.input;
+                Vec2 move = input.getMoveVector();
+
+                double forward=move.y,strafe=move.x,up = 0;
+                while ((minecraft.options.keyJump.consumeClick())) {
+                    up = 1;
+                }
+
+
+                playerDuck.getFlightControls().set(forward,strafe,up);
+                C2SFlightControlPacket.send(forward,strafe,up);
             }
         }
     }

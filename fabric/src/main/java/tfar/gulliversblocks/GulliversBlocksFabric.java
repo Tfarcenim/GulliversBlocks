@@ -118,7 +118,11 @@ public class GulliversBlocksFabric implements ModInitializer {
 
             return InteractionResult.sidedSuccess(world.isClientSide);
         } else if (entity instanceof Parrot parrot) {
-            player.startRiding(parrot);
+            if (parrot.isTame() && player.getUUID().equals(parrot.getOwnerUUID())) {
+                parrot.setOrderedToSit(false);
+                player.startRiding(parrot);
+                parrot.setNoGravity(true);
+            }
         }
         return InteractionResult.PASS;
     }

@@ -13,11 +13,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.*;
+import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
@@ -28,12 +26,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -418,6 +418,47 @@ public class GulliversBlocks {
             double ratio = getRatio(pusher,pushed);
             if (ratio >= TRAMPLE_RATIO) {
                 livingPushed.hurt(livingPushed.damageSources().cramming(), 2);
+            }
+        }
+    }
+
+    public static Vec3 getRideVector(Mob mob, Player player) {
+        if (mob instanceof Parrot) {
+            Vector3d flightControls = PlayerDuck.of(player).getFlightControls();
+            return new Vec3(flightControls.y, 10,flightControls.x);
+        }
+        return null;
+    }
+
+    public static LivingEntity forcePlayerControl(Mob mob) {
+        Entity passenger = mob.getFirstPassenger();
+        if (passenger instanceof Player player && mob instanceof Parrot) {
+            return player;
+        }
+        return null;
+    }
+
+    public static void onTickRidden(LivingEntity livingEntity, Player player, Vec3 pTravelVector) {
+        Vec2 vec2 = new Vec2(player.getXRot() * 0.5F, player.getYRot());
+        //livingEntity.setRot(vec2.y, vec2.x);
+        livingEntity.setYRot(vec2.y % 360.0F);
+        livingEntity.setXRot(vec2.x % 360.0F);
+        livingEntity.yRotO = livingEntity.yBodyRot = livingEntity.yHeadRot = livingEntity.getYRot();
+
+        if (livingEntity instanceof Parrot parrot) {
+           // parrot.getJumpControl().jump();
+            parrot.getNavigation() .moveTo(0,0,0,1);
+        }
+
+
+        if (livingEntity.isControlledByLocalInstance()) {
+            if (livingEntity.onGround()) {
+               // livingEntity.setIsJumping(false);
+         //       if (livingEntity.playerJumpPendingScale > 0.0F && !livingEntity.isJumping()) {
+         //           livingEntity.executeRidersJump(livingEntity.playerJumpPendingScale, travelVector);
+         //       }
+
+             //   livingEntity.playerJumpPendingScale = 0.0F;
             }
         }
     }

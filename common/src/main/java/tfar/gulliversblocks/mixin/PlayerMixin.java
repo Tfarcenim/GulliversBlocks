@@ -7,24 +7,25 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.PlayerDuck;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 
 @Mixin(Player.class)
-public abstract class PlayerEntityMixin extends LivingEntity implements PlayerDuck {
+public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
 
     Map<MountPosition,Entity> mountPositions = new EnumMap<>(MountPosition.class);
+    Vector3d flightControls = new Vector3d();
 
     @Shadow public abstract void travel(Vec3 pTravelVector);
 
-    protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, Level level) {
+    protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
     }
 
@@ -36,6 +37,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements PlayerDu
     @Override
     public Map<MountPosition, Entity> getMountPositions() {
         return mountPositions;
+    }
+
+    @Override
+    public Vector3d getFlightControls() {
+        return flightControls;
     }
 
     @Override

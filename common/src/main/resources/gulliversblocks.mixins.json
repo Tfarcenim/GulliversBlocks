@@ -8,7 +8,8 @@
     "BlockBehaviourMixin",
     "EntityMixin",
     "LivingEntityMixin",
-    "PlayerEntityMixin"
+    "MobMixin",
+    "PlayerMixin"
   ],
   "client": [
     "PlayerRendererMixin"
