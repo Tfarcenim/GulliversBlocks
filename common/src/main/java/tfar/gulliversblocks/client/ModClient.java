@@ -15,8 +15,6 @@ import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.PlayerDuck;
 import tfar.gulliversblocks.network.C2SActionPacket;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
-import tfar.gulliversblocks.network.C2SFlightControlPacket;
-import tfar.gulliversblocks.platform.Services;
 
 import java.util.List;
 import java.util.Map;
@@ -100,19 +98,6 @@ public class ModClient {
                         C2SActionPacket.send(C2SActionPacket.Action.SWAP_HANDS);
                     }
                 }
-            }
-            if (player.getVehicle() instanceof Parrot parrot) {
-                Input input = player.input;
-                Vec2 move = input.getMoveVector();
-
-                double forward=move.y,strafe=move.x,up = 0;
-                while ((minecraft.options.keyJump.consumeClick())) {
-                    up = 1;
-                }
-
-
-                playerDuck.getFlightControls().set(forward,strafe,up);
-                C2SFlightControlPacket.send(forward,strafe,up);
             }
         }
     }

@@ -424,8 +424,8 @@ public class GulliversBlocks {
 
     public static Vec3 getRideVector(Mob mob, Player player) {
         if (mob instanceof Parrot) {
-            Vector3d flightControls = PlayerDuck.of(player).getFlightControls();
-            return new Vec3(flightControls.y, 10,flightControls.x);
+            //boolean jumping = player.jumping;
+            return new Vec3(player.xxa, 0,player.zza);//
         }
         return null;
     }
@@ -447,7 +447,7 @@ public class GulliversBlocks {
 
         if (livingEntity instanceof Parrot parrot) {
            // parrot.getJumpControl().jump();
-            parrot.getNavigation() .moveTo(0,0,0,1);
+         //   parrot.getNavigation() .moveTo(0,0,0,1);
         }
 
 

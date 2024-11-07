@@ -12,5 +12,4 @@ public interface PlayerDuck {
     }
 
     Map<MountPosition, Entity> getMountPositions();
-    Vector3d getFlightControls();
 }

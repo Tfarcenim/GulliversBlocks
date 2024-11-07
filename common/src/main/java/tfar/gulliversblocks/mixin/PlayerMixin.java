@@ -7,7 +7,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Vector3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import tfar.gulliversblocks.GulliversBlocks;
@@ -21,7 +20,6 @@ import java.util.Map;
 public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
 
     Map<MountPosition,Entity> mountPositions = new EnumMap<>(MountPosition.class);
-    Vector3d flightControls = new Vector3d();
 
     @Shadow public abstract void travel(Vec3 pTravelVector);
 
@@ -37,11 +35,6 @@ public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
     @Override
     public Map<MountPosition, Entity> getMountPositions() {
         return mountPositions;
-    }
-
-    @Override
-    public Vector3d getFlightControls() {
-        return flightControls;
     }
 
     @Override
