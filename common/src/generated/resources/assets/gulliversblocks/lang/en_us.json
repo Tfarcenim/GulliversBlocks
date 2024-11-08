@@ -36,5 +36,6 @@
   "item.minecraft.splash_potion.effect.upsize_ii": "Splash Potion of Upsizing II",
   "item.minecraft.splash_potion.effect.upsize_iii": "Splash Potion of Upsizing III",
   "item.minecraft.splash_potion.effect.upsize_iv": "Splash Potion of Upsizing IV",
-  "item.minecraft.splash_potion.effect.upsize_v": "Splash Potion of Upsizing V"
+  "item.minecraft.splash_potion.effect.upsize_v": "Splash Potion of Upsizing V",
+  "sleep.too_big": "Too big to sleep in this bed"
 }

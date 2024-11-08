@@ -105,6 +105,7 @@ public class GulliversBlocks {
     public static final double TRAMPLE_RATIO = 8;
     public static final double PAPER_FLOAT_SIZE = 1.8 * 1/16d;
     public static final double FISHING_ROD_GRAPPLE_SCALE = 1/16d;
+    public static final double MAX_SLEEPING_SIZE = 1.25;
 
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
@@ -424,8 +425,7 @@ public class GulliversBlocks {
 
     public static Vec3 getRideVector(Mob mob, Player player) {
         if (mob instanceof Parrot) {
-            //boolean jumping = player.jumping;
-            return new Vec3(player.xxa, 0,player.zza);//
+            return new Vec3(player.xxa, 0,player.zza);
         }
         return null;
     }
@@ -446,20 +446,14 @@ public class GulliversBlocks {
         livingEntity.yRotO = livingEntity.yBodyRot = livingEntity.yHeadRot = livingEntity.getYRot();
 
         if (livingEntity instanceof Parrot parrot) {
-           // parrot.getJumpControl().jump();
-         //   parrot.getNavigation() .moveTo(0,0,0,1);
-        }
 
-
-        if (livingEntity.isControlledByLocalInstance()) {
-            if (livingEntity.onGround()) {
-               // livingEntity.setIsJumping(false);
-         //       if (livingEntity.playerJumpPendingScale > 0.0F && !livingEntity.isJumping()) {
-         //           livingEntity.executeRidersJump(livingEntity.playerJumpPendingScale, travelVector);
-         //       }
-
-             //   livingEntity.playerJumpPendingScale = 0.0F;
+            boolean jumping = player.jumping;
+            if (jumping) {
+                parrot.addDeltaMovement(new Vec3(0,0.1,0));
             }
+
+            // parrot.getJumpControl().jump();
+         //   parrot.getNavigation() .moveTo(0,0,0,1);
         }
     }
 }

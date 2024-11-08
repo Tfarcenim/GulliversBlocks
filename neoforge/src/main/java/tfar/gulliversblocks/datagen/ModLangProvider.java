@@ -45,6 +45,7 @@ public class ModLangProvider extends LanguageProvider {
         addPotion(ModPotions.RENEWAL,"Potion of Renewal");
         add("death.attack.rose",  "%1$s was pricked to death");
         add( "death.attack.rose.player", "%1$s walked into a rose bush while trying to escape %2$s");
+        add("sleep.too_big","Too big to sleep in this bed");
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {
