@@ -1,8 +1,16 @@
 package tfar.gulliversblocks.config;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.toml.TomlFormat;
+import it.unimi.dsi.fastutil.ints.Int2DoubleLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
+import tfar.gulliversblocks.GulliverScales;
 import tfar.gulliversblocks.Scaling;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GulliversBlocksConfig {
 
@@ -16,6 +24,20 @@ public class GulliversBlocksConfig {
     }
 
 
+    //Small ¼ a block, ½ a block
+    //Default 2 (meters/blocks)
+    //Large 4, 16
+
+    public static Int2DoubleMap defaults() {
+        Int2DoubleMap map = new Int2DoubleLinkedOpenHashMap();
+        map.put(-2,1/8f);
+        map.put(-1,1/4f);
+        map.put(0,1);
+        map.put(1,2);
+        map.put(2,8);
+        return map;
+    }
+
     public static class Server {
 
         public static ModConfigSpec.ConfigValue<Scaling> BLOCK_BREAK_SPEED_SCALING;
@@ -25,8 +47,15 @@ public class GulliversBlocksConfig {
         public static ModConfigSpec.ConfigValue<Scaling> MOVEMENT_SPEED_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> FALL_DAMAGE_MULTIPLIER_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> SAFE_FALL_DISTANCE_SCALING;
+
+        public static ConfigHelper.ConfigObject<Map<Integer,Double>> SCALES;
+
+
         public Server(ModConfigSpec.Builder builder) {
             builder.push("scaling");
+
+            SCALES = ConfigHelper.defineObject(builder, "scales",GulliverScales.CODEC,defaults());
+
             BLOCK_BREAK_SPEED_SCALING = builder.defineEnum("player.block_break_speed",Scaling.SQUARE_ROOT);
             MAX_HEALTH_SCALING = builder.defineEnum("generic.max_health",Scaling.LINEAR);
             MINIMUM_MAX_HEALTH_SCALE = builder.defineInRange("minimum_max_health_scale",.5,0,1);
@@ -37,5 +66,4 @@ public class GulliversBlocksConfig {
             builder.pop();
         }
     }
-
 }

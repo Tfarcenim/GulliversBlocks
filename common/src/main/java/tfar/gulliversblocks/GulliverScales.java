@@ -1,44 +1,17 @@
 package tfar.gulliversblocks;
 
-import it.unimi.dsi.fastutil.ints.Int2DoubleLinkedOpenHashMap;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.UnboundedMapCodec;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
 
 public class GulliverScales {
 
-    public static final Int2DoubleLinkedOpenHashMap SCALES = new Int2DoubleLinkedOpenHashMap();
 
-    public static void addScales() {
-        SCALES.clear();
+    public static final UnboundedMapCodec<Integer, Double> CODEC = Codec.unboundedMap(Codec.INT,Codec.DOUBLE);
 
-        SCALES.put(-7,.03125);
-        SCALES.put(-6,.0625);
-        SCALES.put(-5,.125);
-        SCALES.put(-4,.25);
-        SCALES.put(-3,.5);
-        SCALES.put(-2,.75);
-        SCALES.put(-1,.875);
-
-        SCALES.put(0,1);
-
-        SCALES.put(1,1.25);
-        SCALES.put(2,1.5);
-        SCALES.put(3,5);
-        SCALES.put(4,6.75);
-        SCALES.put(5,9);
-        SCALES.put(6,12);
-        SCALES.put(7,16);
-
-    }
 
     public static boolean valid(int gulliverScale) {
-        return gulliverScale >= SCALES.firstIntKey() && gulliverScale <= SCALES.lastIntKey();
-    }
-
-    public static int min() {
-        return SCALES.firstIntKey();
-    }
-
-    public static int max() {
-        return SCALES.lastIntKey();
+        return GulliversBlocksConfig.Server.SCALES.get().containsKey(gulliverScale);
     }
 
 }

@@ -37,6 +37,7 @@ import org.joml.Vector3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.init.ModDamageTypes;
 import tfar.gulliversblocks.init.ModMobEffects;
@@ -68,7 +69,6 @@ public class GulliversBlocks {
         // your own abstraction layer. You can learn more about this in our provided services class. In this example
         // we have an interface in the common code and use a loader specific implementation to delegate our call to
         // the platform specific approach.
-        GulliverScales.addScales();
         InteractionEvent.FARMLAND_TRAMPLE.register((world, pos, state, distance, entity) -> {
             if (entity instanceof LivingEntity living) {
                 if (living.getBbHeight() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
@@ -80,7 +80,7 @@ public class GulliversBlocks {
         InteractionEvent.RIGHT_CLICK_ITEM.register((player, interactionHand) -> {
             ItemStack stack = player.getItemInHand(interactionHand);
             if (stack.getItem() instanceof FishingRodItem) {
-                if (player.fishing != null && GulliverScales.SCALES.get(LivingEntityDuck.of(player).gulliversBlocks$getGulliverScale()) <= FISHING_ROD_GRAPPLE_SCALE) {
+                if (player.fishing != null && Server.SCALES.get().get(LivingEntityDuck.of(player).gulliversBlocks$getGulliverScale()) <= FISHING_ROD_GRAPPLE_SCALE) {
                     Vec3 playerPos = player.position();
                     Vec3 fishingPos = player.fishing.position();
                     Vec3 dist = fishingPos.subtract(playerPos);
@@ -130,7 +130,7 @@ public class GulliversBlocks {
         } else {
 
             if (GulliverScales.valid(newScale)) {
-                double gulliverScale = GulliverScales.SCALES.get(newScale);
+                double gulliverScale = Server.SCALES.get().getOrDefault(newScale,1d);
                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(living);
                 scaleData.setScaleTickDelay(40);
                 scaleData.setPersistence(true);
@@ -331,7 +331,7 @@ public class GulliversBlocks {
     }
 
     public static double getVisibilityMultiplier(LivingEntity entity, @Nullable Entity lookingEntity) {
-        double m = GulliverScales.SCALES.get(LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale());
+        double m = Server.SCALES.get().getOrDefault(LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale(),1d);
         //   if (lookingEntity != null) {
 
         //      }

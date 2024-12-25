@@ -19,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,7 +47,7 @@ public class ModCommands {
                         )
                         .then(Commands.literal("set")
                                 .then(Commands.argument("targets", EntityArgument.entities())
-                                        .then(Commands.argument("scales", IntegerArgumentType.integer(GulliverScales.min(),GulliverScales.max()))
+                                        .then(Commands.argument("scales", IntegerArgumentType.integer())
                                                 .executes(ModCommands::scaleSet))
                                 )
                         )
@@ -126,7 +127,7 @@ public class ModCommands {
         list.add(Component.empty().append("Gulliver Stats for ").append(entity.getDisplayName()));
         int scale = LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale();
         list.add(Component.literal("Gulliver Scale: " + scale));
-        double absoluteScale = GulliverScales.SCALES.get(scale);
+        double absoluteScale = GulliversBlocksConfig.Server.SCALES.get().getOrDefault(scale,1d);
         list.add(Component.literal("Absolute Scale: " + absoluteScale));
         if (entity instanceof Player player) {
             list.add(Component.literal("Block reach: " + player.blockInteractionRange()));
@@ -207,5 +208,4 @@ public class ModCommands {
             );
         }
     }
-
 }
