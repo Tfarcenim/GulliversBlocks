@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
-import tfar.gulliversblocks.PlayerDuck;
+import tfar.gulliversblocks.duck.PlayerDuck;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -19,38 +19,8 @@ import java.util.Map;
 @Mixin(Player.class)
 public abstract class PlayerMixin extends LivingEntity implements PlayerDuck {
 
-    Map<MountPosition,Entity> mountPositions = new EnumMap<>(MountPosition.class);
 
-    @Shadow public abstract void travel(Vec3 pTravelVector);
-
-    protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
-        super(entityType, level);
+    protected PlayerMixin(EntityType<? extends LivingEntity> pEntityType, Level pLevel) {
+        super(pEntityType, pLevel);
     }
-
-    @Override
-    protected void positionRider(Entity passenger, MoveFunction callback) {
-        super.positionRider(passenger, callback);
-    }
-
-    @Override
-    public Map<MountPosition, Entity> getMountPositions() {
-        return mountPositions;
-    }
-
-    @Override
-    protected Vec3 getPassengerAttachmentPoint(Entity pEntity, EntityDimensions pDimensions, float pPartialTick) {
-        MountPosition mountPos = null;
-        for (Map.Entry<MountPosition,Entity> entry: mountPositions.entrySet()) {
-            if (entry.getValue() == pEntity) {
-                mountPos = entry.getKey();
-            }
-        }
-
-        if (mountPos == null) {
-            return super.getPassengerAttachmentPoint(pEntity, pDimensions, pPartialTick);
-        }
-
-        return GulliversBlocks.repositionRiders((Player)(Object)this,pEntity,pDimensions,pPartialTick,mountPos);
-    }
-
 }

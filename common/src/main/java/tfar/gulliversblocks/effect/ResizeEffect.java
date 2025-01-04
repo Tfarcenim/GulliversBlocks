@@ -5,7 +5,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.jetbrains.annotations.Nullable;
-import tfar.gulliversblocks.LivingEntityDuck;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
 
 public class ResizeEffect extends MobEffect {
 

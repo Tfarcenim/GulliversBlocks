@@ -2,10 +2,7 @@ package tfar.gulliversblocks.mixin;
 
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.Parrot;
@@ -20,13 +17,47 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.gulliversblocks.GulliversBlocks;
-import tfar.gulliversblocks.LivingEntityDuck;
+import tfar.gulliversblocks.MountPosition;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
+
+import java.util.EnumMap;
+import java.util.Map;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements LivingEntityDuck {
     @Shadow public abstract void push(Entity pEntity);
 
     @Shadow public abstract double getAttributeValue(Holder<Attribute> pAttribute);
+
+    Map<MountPosition,Entity> mountPositions = new EnumMap<>(MountPosition.class);
+
+    @Shadow public abstract void travel(Vec3 pTravelVector);
+
+    @Override
+    protected void positionRider(Entity passenger, MoveFunction callback) {
+        super.positionRider(passenger, callback);
+    }
+
+    @Override
+    public Map<MountPosition, Entity> getMountPositions() {
+        return mountPositions;
+    }
+
+    @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity pEntity, EntityDimensions pDimensions, float pPartialTick) {
+        MountPosition mountPos = null;
+        for (Map.Entry<MountPosition,Entity> entry: mountPositions.entrySet()) {
+            if (entry.getValue() == pEntity) {
+                mountPos = entry.getKey();
+            }
+        }
+
+        if (mountPos == null) {
+            return super.getPassengerAttachmentPoint(pEntity, pDimensions, pPartialTick);
+        }
+
+        return GulliversBlocks.repositionRiders((Player)(Object)this,pEntity,pDimensions,pPartialTick,mountPos);
+    }
 
     @Unique
     int gulliversBlocks$gulliverScale;

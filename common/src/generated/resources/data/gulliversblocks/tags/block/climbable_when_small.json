@@ -2,10 +2,15 @@
   "values": [
     "#minecraft:leaves",
     "#minecraft:candle_cakes",
+    "#minecraft:dirt",
     "#minecraft:sand",
+    "#minecraft:wool",
     "minecraft:cake",
     "minecraft:cobweb",
     "minecraft:cactus",
-    "minecraft:gravel"
+    "minecraft:gravel",
+    "minecraft:netherrack",
+    "minecraft:stone",
+    "minecraft:tripwire"
   ]
 }

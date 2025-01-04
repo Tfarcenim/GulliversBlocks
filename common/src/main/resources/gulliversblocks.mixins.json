@@ -12,6 +12,7 @@
     "PlayerMixin"
   ],
   "client": [
+    "HumanoidModelMixin",
     "PlayerRendererMixin"
   ],
   "server": [],

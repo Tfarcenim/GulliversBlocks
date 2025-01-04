@@ -18,8 +18,8 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
-import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
 import tfar.gulliversblocks.config.GulliversBlocksConfig;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
 
 import java.util.ArrayList;
 import java.util.Collection;

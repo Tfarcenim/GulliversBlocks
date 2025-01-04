@@ -1,8 +1,8 @@
-package tfar.gulliversblocks;
+package tfar.gulliversblocks.duck;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import org.joml.Vector3d;
+import tfar.gulliversblocks.MountPosition;
 
 import java.util.Map;
 
@@ -11,5 +11,5 @@ public interface PlayerDuck {
         return (PlayerDuck) player;
     }
 
-    Map<MountPosition, Entity> getMountPositions();
+
 }

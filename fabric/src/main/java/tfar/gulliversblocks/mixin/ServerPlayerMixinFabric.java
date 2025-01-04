@@ -11,9 +11,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import tfar.gulliversblocks.GulliverScales;
 import tfar.gulliversblocks.GulliversBlocks;
-import tfar.gulliversblocks.LivingEntityDuck;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.config.GulliversBlocksConfig;
 
 @Mixin(ServerPlayer.class)

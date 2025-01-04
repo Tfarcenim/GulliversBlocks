@@ -204,7 +204,5 @@ public abstract class LivingEntityMixinFabric extends Entity {
         if (GulliversBlocks.canClimb((LivingEntity) (Object)this,getInBlockState())) {
             cir.setReturnValue(true);
         }
-
     }
-
 }

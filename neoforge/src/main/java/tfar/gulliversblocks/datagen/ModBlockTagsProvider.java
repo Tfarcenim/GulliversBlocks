@@ -21,9 +21,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
         //    - Can climb through leaves, grass, gravel, wool, cactus, cake, cobwebs, etc. by holding shift
-        tag(ModTags.Blocks.CLIMBABLE_WHEN_SMALL).addTag(BlockTags.LEAVES).addTag(BlockTags.CANDLE_CAKES)
-                .addTag(BlockTags.SAND)
-                .add(Blocks.CAKE,Blocks.COBWEB,Blocks.CACTUS,Blocks.GRAVEL)
+        tag(ModTags.Blocks.CLIMBABLE_WHEN_SMALL).addTags(BlockTags.LEAVES,BlockTags.CANDLE_CAKES,BlockTags.DIRT,BlockTags.SAND,BlockTags.WOOL)
+                .add(Blocks.CAKE,Blocks.COBWEB,Blocks.CACTUS,Blocks.GRAVEL,Blocks.NETHERRACK,Blocks.STONE,Blocks.TRIPWIRE)
         ;
     }
 }

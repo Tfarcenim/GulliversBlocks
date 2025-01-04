@@ -5,7 +5,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import tfar.gulliversblocks.MountPosition;
-import tfar.gulliversblocks.PlayerDuck;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
+import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 
@@ -23,7 +24,7 @@ public class ClientPacketHandler {
 
                 Player player = mc.player;
                 if (player != null) {
-                    PlayerDuck playerDuck = PlayerDuck.of(player);
+                    LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
                     Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
                     mounts.put(s2CSetMountPositionPacket.mountPosition, entity);
                 }
@@ -37,7 +38,7 @@ public class ClientPacketHandler {
         if (level != null) {
             Player player = mc.player;
             if (player != null) {
-                PlayerDuck playerDuck = PlayerDuck.of(player);
+                LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
                 Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
                 mounts.remove(s2CSetMountPositionPacket.mountPosition);
             }

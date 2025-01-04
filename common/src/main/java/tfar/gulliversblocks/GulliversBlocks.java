@@ -2,9 +2,11 @@ package tfar.gulliversblocks;
 
 import dev.architectury.event.CompoundEventResult;
 import dev.architectury.event.EventResult;
+import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -20,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.FishingRodItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -33,12 +36,12 @@ import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
+import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.init.ModDamageTypes;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
@@ -48,6 +51,7 @@ import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
 import virtuoel.pehkui.api.*;
 
+import java.util.List;
 import java.util.Map;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
@@ -90,6 +94,18 @@ public class GulliversBlocks {
             }
             return CompoundEventResult.pass();
         });
+        EntityEvent.LIVING_HURT.register((livingEntity, damageSource, v) -> {
+
+            List<Entity> passengers = livingEntity.getPassengers();
+
+            if (!passengers.isEmpty()) {
+                LivingEntityDuck livingEntityDuck = LivingEntityDuck.of(livingEntity);
+                Map<MountPosition, Entity> mountPositions = livingEntityDuck.getMountPositions();
+                
+            }
+
+            return EventResult.pass();
+        });
     }
 
     public static void register() {
@@ -101,10 +117,10 @@ public class GulliversBlocks {
     public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1 / 16d;
     public static final double PRESSURE_PLATE_SIZE = 1.8 * 1 / 16d;
     public static final double CACTUS_PRICK_SIZE = 1.8 * 1 / 16d;
-    public static final double CLIMB_LEAVES_SIZE = 1.8 * 1 / 16d;
+    public static final double CLIMB_BLOCKS_SIZE = 1 / 2d;
     public static final double TRAMPLE_RATIO = 8;
-    public static final double PAPER_FLOAT_SIZE = 1.8 * 1/16d;
-    public static final double FISHING_ROD_GRAPPLE_SCALE = 1/16d;
+    public static final double PAPER_FLOAT_SIZE = 1 / 2d;
+    public static final double FISHING_ROD_GRAPPLE_SCALE = 1 / 16d;
     public static final double MAX_SLEEPING_SIZE = 1.25;
 
 
@@ -130,7 +146,7 @@ public class GulliversBlocks {
         } else {
 
             if (GulliverScales.valid(newScale)) {
-                double gulliverScale = Server.SCALES.get().getOrDefault(newScale,1d);
+                double gulliverScale = Server.SCALES.get().getOrDefault(newScale, 1d);
                 ScaleData scaleData = ScaleTypes.BASE.getScaleData(living);
                 scaleData.setScaleTickDelay(40);
                 scaleData.setPersistence(true);
@@ -166,13 +182,51 @@ public class GulliversBlocks {
         }
     }
 
+    public static final ResourceLocation HELD_ONLY = GulliversBlocks.id("held_only");
+
     public static void tickPlayer(Player player) {
-        if (!player.level().isClientSide &&player.getBbHeight() <= PAPER_FLOAT_SIZE && (player.getMainHandItem().is(Items.PAPER) || player.getOffhandItem().is(Items.PAPER))) {
-            player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING,5,0,false,false));
+        if (!player.level().isClientSide) {
+            ItemStack hand = player.getMainHandItem();
+            ItemStack off = player.getOffhandItem();
+            if (player.getBbHeight() <= PAPER_FLOAT_SIZE && (hand.is(Items.PAPER) || off.is(Items.PAPER))) {
+                player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 5, 0, false, false));
+            }
+            if (hand.is(Items.STICK)) {
+                if (player.getBbHeight() <= .5) {
+                    AttributeModifier modifier = new AttributeModifier(HELD_ONLY, 2, AttributeModifier.Operation.ADD_VALUE);
+                    ItemAttributeModifiers attributeModifiers = hand.get(DataComponents.ATTRIBUTE_MODIFIERS);
+                    if (attributeModifiers != null) {
+                        attributeModifiers = attributeModifiers.withModifierAdded(Attributes.ENTITY_INTERACTION_RANGE, modifier, EquipmentSlotGroup.MAINHAND)
+                                .withModifierAdded(Attributes.BLOCK_INTERACTION_RANGE, modifier, EquipmentSlotGroup.MAINHAND);
+                    } else {
+                        attributeModifiers = ItemAttributeModifiers.builder().add(Attributes.ENTITY_INTERACTION_RANGE, modifier, EquipmentSlotGroup.MAINHAND)
+                                .add(Attributes.BLOCK_INTERACTION_RANGE, modifier, EquipmentSlotGroup.MAINHAND).build();
+                    }
+                    hand.set(DataComponents.ATTRIBUTE_MODIFIERS,attributeModifiers);
+                } else {
+                    ItemAttributeModifiers attributeModifiers = hand.get(DataComponents.ATTRIBUTE_MODIFIERS);
+
+
+                    if (attributeModifiers != null) {
+                        attributeModifiers = removeModifier(attributeModifiers,HELD_ONLY);
+                    }
+                    hand.set(DataComponents.ATTRIBUTE_MODIFIERS,attributeModifiers);
+                }
+            }
         }
     }
 
-    public static void copyFrom(ServerPlayer oldPlayer,ServerPlayer newPlayer,boolean alive) {
+    public static ItemAttributeModifiers removeModifier(ItemAttributeModifiers oldModifiers,ResourceLocation modifierID) {
+        ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
+        for (ItemAttributeModifiers.Entry entry : oldModifiers.modifiers()) {
+            if (!entry.modifier().is(modifierID)) {
+                builder.add(entry.attribute(),entry.modifier(),entry.slot());
+            }
+        }
+        return builder.build();
+    }
+
+    public static void copyFrom(ServerPlayer oldPlayer, ServerPlayer newPlayer, boolean alive) {
         LivingEntityDuck oldPlayerDuck = LivingEntityDuck.of(oldPlayer);
         LivingEntityDuck newPlayerDuck = LivingEntityDuck.of(newPlayer);
 
@@ -244,7 +298,7 @@ public class GulliversBlocks {
     }
 
     static boolean canPickup(Player player, InteractionHand hand, Entity entity) {
-        PlayerDuck playerDuck = PlayerDuck.of(player);
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
         HumanoidArm mainArm = player.getMainArm();
         Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
         switch (mainArm) {
@@ -284,7 +338,7 @@ public class GulliversBlocks {
     }
 
     public static void swap(ServerPlayer player, MountPosition pos1, MountPosition pos2) {
-        PlayerDuck playerDuck = PlayerDuck.of(player);
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
         Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
         Entity mount1 = mounts.get(pos1);
         Entity mount2 = mounts.get(pos2);
@@ -331,7 +385,7 @@ public class GulliversBlocks {
     }
 
     public static double getVisibilityMultiplier(LivingEntity entity, @Nullable Entity lookingEntity) {
-        double m = Server.SCALES.get().getOrDefault(LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale(),1d);
+        double m = Server.SCALES.get().getOrDefault(LivingEntityDuck.of(entity).gulliversBlocks$getGulliverScale(), 1d);
         //   if (lookingEntity != null) {
 
         //      }
@@ -358,15 +412,16 @@ public class GulliversBlocks {
             Entity entity = entityCollisionContext.getEntity();
             if (entity != null) {
                 if (blockBehaviour instanceof LeavesBlock) {
-                    if (entity.getBbHeight() <= CLIMB_LEAVES_SIZE) {
+                    if (entity.getBbHeight() <= CLIMB_BLOCKS_SIZE) {
                         cir.setReturnValue(Shapes.empty());
                     }
                 }
             }
         }
     }
-    public static boolean canClimb(LivingEntity living,BlockState state) {
-        if (living.getBbHeight() <= CLIMB_LEAVES_SIZE) {
+
+    public static boolean canClimb(LivingEntity living, BlockState state) {
+        if (living.getBbHeight() <= CLIMB_BLOCKS_SIZE) {
             if (state.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
                 return true;
             }
@@ -374,31 +429,21 @@ public class GulliversBlocks {
             if (living.getMainHandItem().is(Items.SLIME_BALL) || living.getOffhandItem().is(Items.SLIME_BALL)) {
                 Vec3 look = living.getLookAngle();
                 Vec3 movementDirection = look.scale(.05);
-                Vec3 pred = living.position().add(movementDirection.x,0,movementDirection.z);
+                Vec3 pred = living.position().add(movementDirection.x, 0, movementDirection.z);
                 BlockPos predPos = BlockPos.containing(pred);
                 BlockState stateCollidedWith = living.level().getBlockState(predPos);
-                if (!stateCollidedWith.getCollisionShape(living.level(),predPos).isEmpty()) {
+                if (!stateCollidedWith.getCollisionShape(living.level(), predPos).isEmpty()) {
                     return true;
                 }
             }
 
             if (living.horizontalCollision) {
                 Vec3 look = living.getLookAngle();
-
-
-
-                //xxa is strafe -1->1, zza is forward/backward 1->-1
-                double xxa = living.xxa;
-                double zza = living.zza;
-                Vec3 movementDirection = look.scale(zza * .05);
-
-
-              //  movementDirection = movementDirection.yRot((float) Math.asin(xxa));
-                Vec3 playerPos = living.position();
-                Vec3 pred = playerPos.add(movementDirection.x,0,movementDirection.z);
+                Vec3 movementDirection = look.scale(.05);
+                Vec3 pred = living.position().add(movementDirection.x, 0, movementDirection.z);
                 BlockPos predPos = BlockPos.containing(pred);
                 BlockState stateCollidedWith = living.level().getBlockState(predPos);
-                if (stateCollidedWith.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
+                if (stateCollidedWith.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL) && !stateCollidedWith.getCollisionShape(living.level(), predPos).isEmpty()) {
                     return true;
                 }
             }
@@ -406,7 +451,7 @@ public class GulliversBlocks {
         return false;
     }
 
-    public static double getRatio(Entity entity1,Entity entity2) {
+    public static double getRatio(Entity entity1, Entity entity2) {
         EntityDimensions entityDimensions1 = entity1.getDimensions(entity1.getPose());
         EntityDimensions entityDimensions = entity2.getDimensions(entity2.getPose());
         double entity1Volume = entityDimensions1.height() * entityDimensions1.width() * entityDimensions1.width();
@@ -414,9 +459,9 @@ public class GulliversBlocks {
         return entity1Volume / entity2Volume;
     }
 
-    public static void onPushed(LivingEntity pusher,Entity pushed) {
+    public static void onPushed(LivingEntity pusher, Entity pushed) {
         if (!pushed.isPassenger() && pushed instanceof LivingEntity livingPushed) {
-            double ratio = getRatio(pusher,pushed);
+            double ratio = getRatio(pusher, pushed);
             if (ratio >= TRAMPLE_RATIO) {
                 livingPushed.hurt(livingPushed.damageSources().cramming(), 2);
             }
@@ -425,7 +470,7 @@ public class GulliversBlocks {
 
     public static Vec3 getRideVector(Mob mob, Player player) {
         if (mob instanceof Parrot) {
-            return new Vec3(player.xxa, 0,player.zza);
+            return new Vec3(player.xxa, 0, player.zza);
         }
         return null;
     }
@@ -449,11 +494,11 @@ public class GulliversBlocks {
 
             boolean jumping = player.jumping;
             if (jumping) {
-                parrot.addDeltaMovement(new Vec3(0,0.1,0));
+                parrot.addDeltaMovement(new Vec3(0, 0.1, 0));
             }
 
             // parrot.getJumpControl().jump();
-         //   parrot.getNavigation() .moveTo(0,0,0,1);
+            //   parrot.getNavigation() .moveTo(0,0,0,1);
         }
     }
 }

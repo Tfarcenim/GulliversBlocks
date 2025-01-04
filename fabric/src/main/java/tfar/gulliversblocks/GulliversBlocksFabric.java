@@ -27,6 +27,8 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.config.ModConfig;
 import org.jetbrains.annotations.Nullable;
 import tfar.gulliversblocks.config.GulliversBlocksConfig;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
+import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.events.LivingWaterCallbacks;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.PacketHandler;
@@ -89,7 +91,7 @@ public class GulliversBlocksFabric implements ModInitializer {
     InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
         if (GulliversBlocks.canPickup(player,hand,entity)) {
             entity.startRiding(player);
-            PlayerDuck playerDuck = PlayerDuck.of(player);
+            LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
             HumanoidArm mainArm = player.getMainArm();
             Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
             switch (mainArm) {

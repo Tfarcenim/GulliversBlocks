@@ -2,17 +2,18 @@ package tfar.gulliversblocks.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.player.Input;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.item.Items;
+import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
-import tfar.gulliversblocks.PlayerDuck;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
+import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.network.C2SActionPacket;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
 
@@ -34,7 +35,7 @@ public class ModClient {
     }
 
     public static void onLeftClickEmpty(Player player) {
-        PlayerDuck playerDuck = PlayerDuck.of(player);
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
         Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
         HumanoidArm arm = player.getMainArm();
         switch (arm) {
@@ -54,7 +55,7 @@ public class ModClient {
     }
 
     public static boolean onArmRender(Player player, HumanoidArm arm) {
-        PlayerDuck playerDuck = PlayerDuck.of(player);
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
         Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
 
         if (arm == HumanoidArm.RIGHT) {
@@ -65,7 +66,7 @@ public class ModClient {
     }
 
     public static HumanoidModel.ArmPose getArmPose(AbstractClientPlayer pPlayer, InteractionHand pHand) {
-        PlayerDuck playerDuck = PlayerDuck.of(pPlayer);
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(pPlayer);
         Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
         HumanoidArm arm = pPlayer.getMainArm();
         switch (pHand) {
@@ -90,7 +91,7 @@ public class ModClient {
     public static void interceptKeybinds(Minecraft minecraft) {
         LocalPlayer player = minecraft.player;
         if (player != null) {
-            PlayerDuck playerDuck = PlayerDuck.of(player);
+            LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
             Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
             if (!mounts.isEmpty()) {
                 while (minecraft.options.keySwapOffhand.consumeClick()) {
@@ -107,4 +108,21 @@ public class ModClient {
             C2SActionPacket.send(C2SActionPacket.Action.SWAP_SHOULDER);
         }
     }
+
+    public static void adjustArms(Player player,ModelPart leftArm,ModelPart rightArm) {
+        if (player.getBbHeight() < GulliversBlocks.PAPER_FLOAT_SIZE && player.getMainHandItem().is(Items.PAPER) || player.getOffhandItem().is(Items.PAPER)) {
+            float x = (float) Math.PI;
+            float z = 0.05f;
+
+            changeRotation(rightArm, -x, 0, -z);
+            changeRotation(leftArm, -x, 0, z);
+        }
+    }
+
+    private static void changeRotation(ModelPart part, float x, float y, float z) {
+        part.xRot = x;
+        part.yRot = y;
+        part.zRot = z;
+    }
+
 }

@@ -3,10 +3,8 @@ package tfar.gulliversblocks.network;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -14,7 +12,8 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
-import tfar.gulliversblocks.PlayerDuck;
+import tfar.gulliversblocks.duck.LivingEntityDuck;
+import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
 
@@ -39,7 +38,7 @@ public class C2SActionPacket implements C2SModPacket<RegistryFriendlyByteBuf>  {
 
     @Override
     public void handleServer(ServerPlayer player) {
-        PlayerDuck playerDuck = PlayerDuck.of(player);
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
         Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
         switch (action) {
             case THROW -> {
