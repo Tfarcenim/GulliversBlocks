@@ -6,6 +6,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.apache.commons.lang3.tuple.Pair;
 import tfar.gulliversblocks.PacketHandlerNeoForge;
@@ -16,6 +17,7 @@ import tfar.gulliversblocks.platform.services.IPlatformHelper;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLLoader;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -63,6 +65,16 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public void sendToClient(S2CModPacket<?> msg, ServerPlayer player) {
         PacketHandlerNeoForge.sendToClient(msg, player);
+    }
+
+    @Override
+    public void sendToTracking(S2CModPacket<?> msg, Entity entity) {
+
+    }
+
+    @Override
+    public Collection<ServerPlayer> getTracking(Entity entity) {
+        return List.of();
     }
 
     @Override

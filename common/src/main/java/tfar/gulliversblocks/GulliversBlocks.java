@@ -7,8 +7,11 @@ import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -51,8 +54,10 @@ import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
 import virtuoel.pehkui.api.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 // This class is part of the common project meaning it is shared between all supported loaders. Code written here can only
 // import and access the vanilla codebase, libraries used by vanilla, and optionally third party libraries that provide
@@ -99,13 +104,35 @@ public class GulliversBlocks {
             List<Entity> passengers = livingEntity.getPassengers();
 
             if (!passengers.isEmpty()) {
-                LivingEntityDuck livingEntityDuck = LivingEntityDuck.of(livingEntity);
-                Map<MountPosition, Entity> mountPositions = livingEntityDuck.getMountPositions();
-                
+                checkDrop(livingEntity,MountPosition.RIGHT_HAND);
+                checkDrop(livingEntity,MountPosition.LEFT_HAND);
             }
 
             return EventResult.pass();
         });
+    }
+
+    public static void checkDrop(LivingEntity living,MountPosition mountPosition) {
+        LivingEntityDuck livingEntityDuck = LivingEntityDuck.of(living);
+
+        Map<MountPosition, Entity> mountPositions = livingEntityDuck.getMountPositions();
+        Entity rightHandEntity = mountPositions.get(mountPosition);
+        if (rightHandEntity != null) {
+            boolean shouldDrop = true;
+            if (rightHandEntity instanceof LivingEntity livingRightHandEntity) {
+                shouldDrop = !eitherHandHas(livingRightHandEntity,stack -> stack.is(ModTags.Items.PREVENTS_DISMOUNT));
+            }
+
+            if (shouldDrop) {
+                rightHandEntity.stopRiding();
+                livingEntityDuck.getMountPositions().remove(mountPosition);
+                S2CRemoveMountPositionPacket.sendToTracking(living, mountPosition);
+            }
+        }
+    }
+
+    public static boolean eitherHandHas(LivingEntity living,Predicate<ItemStack> stackPredicate) {
+        return stackPredicate.test(living.getMainHandItem()) || stackPredicate.test(living.getOffhandItem());
     }
 
     public static void register() {
@@ -345,18 +372,18 @@ public class GulliversBlocks {
 
         if (mount2 != null) {
             mounts.put(pos1, mount2);
-            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos1, mount2), player);
+            S2CSetMountPositionPacket.sendToTracking(player,pos1,mount2);
         } else {
             mounts.remove(pos1);
-            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos1), player);
+            S2CRemoveMountPositionPacket.sendToTracking(player,pos1);
         }
 
         if (mount1 != null) {
             mounts.put(pos2, mount1);
-            Services.PLATFORM.sendToClient(new S2CSetMountPositionPacket(pos2, mount1), player);
+            S2CSetMountPositionPacket.sendToTracking(player,pos2, mount1);
         } else {
             mounts.remove(pos2);
-            Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(pos2), player);
+            S2CRemoveMountPositionPacket.sendToTracking(player,pos2);
         }
     }
 

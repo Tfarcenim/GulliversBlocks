@@ -5,13 +5,12 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import tfar.gulliversblocks.network.C2SModPacket;
 import tfar.gulliversblocks.network.S2CModPacket;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public interface IPlatformHelper {
 
@@ -70,4 +69,11 @@ public interface IPlatformHelper {
     void sendToClient(S2CModPacket<?> msg, ServerPlayer player);
     void sendToServer(C2SModPacket<?> msg);
 
+    void sendToTracking(S2CModPacket<?> msg, Entity entity);
+    default void sendToTrackingAndSelf(S2CModPacket<?> msg, Entity entity, ServerPlayer player) {
+        sendToTracking(msg, entity);
+        sendToClient(msg, player);
+    }
+
+    Collection<ServerPlayer> getTracking(Entity entity);
 }

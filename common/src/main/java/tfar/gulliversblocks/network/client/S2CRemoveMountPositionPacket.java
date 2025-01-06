@@ -5,6 +5,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.client.ClientPacketHandler;
 import tfar.gulliversblocks.network.ModPacket;
@@ -18,18 +19,26 @@ public class S2CRemoveMountPositionPacket implements S2CModPacket<RegistryFriend
 
 
     public static final Type<S2CRemoveMountPositionPacket> TYPE = ModPacket.type(S2CRemoveMountPositionPacket.class);
+
+    public final int entityId;
     public final MountPosition mountPosition;
 
-    public S2CRemoveMountPositionPacket(MountPosition mountPosition) {
+    public S2CRemoveMountPositionPacket(Entity entity,MountPosition mountPosition) {
+        entityId = entity.getId();
         this.mountPosition = mountPosition;
     }
 
     public S2CRemoveMountPositionPacket(FriendlyByteBuf buf) {
+        entityId = buf.readInt();
         mountPosition = buf.readEnum(MountPosition.class);
     }
 
-    public static void send(MountPosition mountPosition, ServerPlayer player) {
-        Services.PLATFORM.sendToClient(new S2CRemoveMountPositionPacket(mountPosition),player);
+    public static void sendToTracking(Entity entity, MountPosition mountPosition) {
+        S2CRemoveMountPositionPacket packet = new S2CRemoveMountPositionPacket(entity,mountPosition);
+        Services.PLATFORM.sendToTracking(packet,entity);
+        if (entity instanceof ServerPlayer serverPlayer) {
+            Services.PLATFORM.sendToClient(packet,serverPlayer);
+        }
     }
 
     @Override
@@ -39,6 +48,7 @@ public class S2CRemoveMountPositionPacket implements S2CModPacket<RegistryFriend
 
     @Override
     public void write(RegistryFriendlyByteBuf buf) {
+        buf.writeInt(entityId);
         buf.writeEnum(mountPosition);
     }
 

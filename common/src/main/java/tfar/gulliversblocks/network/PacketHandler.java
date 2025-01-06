@@ -2,7 +2,6 @@ package tfar.gulliversblocks.network;
 
 import net.minecraft.resources.ResourceLocation;
 import tfar.gulliversblocks.GulliversBlocks;
-import tfar.gulliversblocks.network.client.S2CInitialEntityPacket;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
@@ -19,7 +18,6 @@ public class PacketHandler {
 
         ///////server to client
 
-        Services.PLATFORM.registerClientPlayPacket(S2CInitialEntityPacket.TYPE, S2CInitialEntityPacket.STREAM_CODEC);
         Services.PLATFORM.registerClientPlayPacket(S2CSetMountPositionPacket.TYPE, S2CSetMountPositionPacket.STREAM_CODEC);
         Services.PLATFORM.registerClientPlayPacket(S2CRemoveMountPositionPacket.TYPE, S2CRemoveMountPositionPacket.STREAM_CODEC);
 

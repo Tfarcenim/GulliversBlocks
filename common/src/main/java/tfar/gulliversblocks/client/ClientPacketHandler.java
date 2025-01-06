@@ -2,6 +2,7 @@ package tfar.gulliversblocks.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import tfar.gulliversblocks.MountPosition;
@@ -20,14 +21,11 @@ public class ClientPacketHandler {
         Level level = mc.level;
         if (level != null) {
             Entity entity = level.getEntity(s2CSetMountPositionPacket.entityId);
-            if (entity != null) {
-
-                Player player = mc.player;
-                if (player != null) {
-                    LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
+            if (entity instanceof LivingEntity livingEntity) {
+                Entity passenger = level.getEntity(s2CSetMountPositionPacket.passengerId);
+                    LivingEntityDuck playerDuck = LivingEntityDuck.of(livingEntity);
                     Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
-                    mounts.put(s2CSetMountPositionPacket.mountPosition, entity);
-                }
+                    mounts.put(s2CSetMountPositionPacket.mountPosition, passenger);
             }
         }
     }
@@ -36,9 +34,9 @@ public class ClientPacketHandler {
         Minecraft mc = Minecraft.getInstance();
         Level level = mc.level;
         if (level != null) {
-            Player player = mc.player;
-            if (player != null) {
-                LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
+            Entity entity = level.getEntity(s2CSetMountPositionPacket.entityId);
+            if (entity instanceof LivingEntity livingEntity) {
+                LivingEntityDuck playerDuck = LivingEntityDuck.of(livingEntity);
                 Map<MountPosition, Entity> mounts = playerDuck.getMountPositions();
                 mounts.remove(s2CSetMountPositionPacket.mountPosition);
             }

@@ -2,6 +2,7 @@ package tfar.gulliversblocks.platform;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
@@ -9,6 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.network.C2SModPacket;
@@ -16,6 +18,8 @@ import tfar.gulliversblocks.network.S2CModPacket;
 import tfar.gulliversblocks.platform.services.IPlatformHelper;
 import net.fabricmc.loader.api.FabricLoader;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public class FabricPlatformHelper implements IPlatformHelper {
@@ -64,8 +68,17 @@ public class FabricPlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public void sendToServer(C2SModPacket msg) {
+    public void sendToServer(C2SModPacket<?> msg) {
         ClientPlayNetworking.send(msg);
     }
 
+    @Override
+    public void sendToTracking(S2CModPacket<?> msg, Entity entity) {
+        PlayerLookup.tracking(entity).forEach(player -> sendToClient(msg,player));
+    }
+
+    @Override
+    public Collection<ServerPlayer> getTracking(Entity entity) {
+        return PlayerLookup.tracking(entity);
+    }
 }

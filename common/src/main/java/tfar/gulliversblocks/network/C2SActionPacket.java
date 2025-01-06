@@ -13,7 +13,6 @@ import net.minecraft.world.entity.LivingEntity;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
-import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
 
@@ -53,9 +52,12 @@ public class C2SActionPacket implements C2SModPacket<RegistryFriendlyByteBuf>  {
                             if (entity instanceof LivingEntity living) {
                                 living.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,100,0));
                             }
+
+
+
                             player.connection.send(new ClientboundSetPassengersPacket(player));
                             playerDuck.getMountPositions().remove(MountPosition.RIGHT_HAND);
-                            S2CRemoveMountPositionPacket.send(MountPosition.RIGHT_HAND,player);
+                            S2CRemoveMountPositionPacket.sendToTracking(player,MountPosition.RIGHT_HAND);
                         }
                     }
                 }

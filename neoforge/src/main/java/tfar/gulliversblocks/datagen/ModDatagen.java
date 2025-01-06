@@ -3,6 +3,7 @@ package tfar.gulliversblocks.datagen;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.neoforged.neoforge.common.data.BlockTagsProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
@@ -17,7 +18,9 @@ public class ModDatagen {
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         generator.addProvider(true,new ModLangProvider(output));
         generator.addProvider(true,new ModDamageTypeTagsProvider(output,lookupProvider,existingFileHelper));
-        generator.addProvider(true,new ModBlockTagsProvider(output,lookupProvider,existingFileHelper));
+        BlockTagsProvider blockTagsProvider = new ModBlockTagsProvider(output,lookupProvider,existingFileHelper);
+        generator.addProvider(true,blockTagsProvider);
+        generator.addProvider(true,new ModItemTagsProvider(output,lookupProvider,blockTagsProvider.contentsGetter()));
     }
 
 }
