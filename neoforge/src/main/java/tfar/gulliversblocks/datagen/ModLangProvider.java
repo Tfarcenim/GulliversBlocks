@@ -2,6 +2,9 @@ package tfar.gulliversblocks.datagen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.ComponentContents;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -89,6 +92,15 @@ public class ModLangProvider extends LanguageProvider {
 
     public static String getNameFromEntity(EntityType<?> entity) {
         return StringUtils.capitaliseAllWords(entity.getDescriptionId().split("\\.")[2].replace("_", " "));
+    }
+
+    protected void addTextComponent(MutableComponent component, String text) {
+        ComponentContents contents = component.getContents();
+        if (contents instanceof TranslatableContents translatableContents) {
+            add(translatableContents.getKey(),text);
+        } else {
+            throw new UnsupportedOperationException(component +" is not translatable");
+        }
     }
 
 }

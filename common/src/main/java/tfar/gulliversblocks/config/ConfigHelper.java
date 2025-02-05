@@ -305,11 +305,10 @@ public class ConfigHelper
         @Override
         public DataResult<Stream<Pair<Object, Object>>> getMapValues(Object input)
         {
-            if (!(input instanceof Config))
+            if (!(input instanceof Config config))
             {
                 return DataResult.error(() -> "Not a Config: " + input);
             }
-            final Config config = (Config)input;
             return DataResult.success(config.entrySet().stream().map(entry -> Pair.of(entry.getKey(), entry.getValue())));
         }
 

@@ -108,6 +108,13 @@ public class GulliversBlocks {
                 checkDrop(livingEntity,MountPosition.LEFT_HAND);
             }
 
+            Entity attacker = damageSource.getDirectEntity();
+            if (attacker instanceof LivingEntity livingAttacker) {
+                if (passengers.contains(livingAttacker) && livingAttacker.getMainHandItem().is(ModTags.Items.PREVENTS_DISMOUNT)) {
+                    return EventResult.interruptFalse();
+                }
+            }
+
             return EventResult.pass();
         });
     }
