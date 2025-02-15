@@ -31,8 +31,6 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
 
     Map<MountPosition,Entity> mountPositions = new EnumMap<>(MountPosition.class);
 
-    @Shadow public abstract void travel(Vec3 pTravelVector);
-
     @Override
     protected void positionRider(Entity passenger, MoveFunction callback) {
         super.positionRider(passenger, callback);
@@ -56,7 +54,7 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
             return super.getPassengerAttachmentPoint(pEntity, pDimensions, pPartialTick);
         }
 
-        return GulliversBlocks.repositionRiders((Player)(Object)this,pEntity,pDimensions,pPartialTick,mountPos);
+        return GulliversBlocks.repositionRiders((LivingEntity)(Object)this,pEntity,pDimensions,pPartialTick,mountPos);
     }
 
     @Unique

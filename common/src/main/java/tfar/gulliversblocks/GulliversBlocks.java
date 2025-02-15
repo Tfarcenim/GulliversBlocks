@@ -7,13 +7,11 @@ import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -32,6 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -44,14 +43,11 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
-import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.init.*;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
-import tfar.gulliversblocks.platform.Services;
 import virtuoel.pehkui.api.*;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -101,8 +97,8 @@ public class GulliversBlocks {
             List<Entity> passengers = livingEntity.getPassengers();
 
             if (!passengers.isEmpty()) {
-                checkDrop(livingEntity,MountPosition.RIGHT_HAND);
-                checkDrop(livingEntity,MountPosition.LEFT_HAND);
+                checkDrop(livingEntity, MountPosition.RIGHT_HAND);
+                checkDrop(livingEntity, MountPosition.LEFT_HAND);
             }
 
             Entity attacker = damageSource.getDirectEntity();
@@ -116,7 +112,7 @@ public class GulliversBlocks {
         });
     }
 
-    public static void checkDrop(LivingEntity living,MountPosition mountPosition) {
+    public static void checkDrop(LivingEntity living, MountPosition mountPosition) {
         LivingEntityDuck livingEntityDuck = LivingEntityDuck.of(living);
 
         Map<MountPosition, Entity> mountPositions = livingEntityDuck.getMountPositions();
@@ -124,7 +120,7 @@ public class GulliversBlocks {
         if (rightHandEntity != null) {
             boolean shouldDrop = true;
             if (rightHandEntity instanceof LivingEntity livingRightHandEntity) {
-                shouldDrop = !eitherHandHas(livingRightHandEntity,stack -> stack.is(ModTags.Items.PREVENTS_DISMOUNT));
+                shouldDrop = !eitherHandHas(livingRightHandEntity, stack -> stack.is(ModTags.Items.PREVENTS_DISMOUNT));
             }
 
             if (shouldDrop) {
@@ -135,7 +131,7 @@ public class GulliversBlocks {
         }
     }
 
-    public static boolean eitherHandHas(LivingEntity living,Predicate<ItemStack> stackPredicate) {
+    public static boolean eitherHandHas(LivingEntity living, Predicate<ItemStack> stackPredicate) {
         return stackPredicate.test(living.getMainHandItem()) || stackPredicate.test(living.getOffhandItem());
     }
 
@@ -205,7 +201,7 @@ public class GulliversBlocks {
                 double safeFallScaling = Server.SAFE_FALL_DISTANCE_SCALING.get().function.applyAsDouble(gulliverScale);
                 addAttributeMultSafely(living, Attributes.SAFE_FALL_DISTANCE, safeFallScaling);
                 if (living instanceof ServerPlayer player) {
-                    ModCriteriaTriggers.REACH_SIZE_TRIGGER.trigger(player,gulliverScale);
+                    ModCriteriaTriggers.REACH_SIZE.trigger(player, gulliverScale);
                 }
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
@@ -236,25 +232,25 @@ public class GulliversBlocks {
                         attributeModifiers = ItemAttributeModifiers.builder().add(Attributes.ENTITY_INTERACTION_RANGE, modifier, EquipmentSlotGroup.MAINHAND)
                                 .add(Attributes.BLOCK_INTERACTION_RANGE, modifier, EquipmentSlotGroup.MAINHAND).build();
                     }
-                    hand.set(DataComponents.ATTRIBUTE_MODIFIERS,attributeModifiers);
+                    hand.set(DataComponents.ATTRIBUTE_MODIFIERS, attributeModifiers);
                 } else {
                     ItemAttributeModifiers attributeModifiers = hand.get(DataComponents.ATTRIBUTE_MODIFIERS);
 
 
                     if (attributeModifiers != null) {
-                        attributeModifiers = removeModifier(attributeModifiers,HELD_ONLY);
+                        attributeModifiers = removeModifier(attributeModifiers, HELD_ONLY);
                     }
-                    hand.set(DataComponents.ATTRIBUTE_MODIFIERS,attributeModifiers);
+                    hand.set(DataComponents.ATTRIBUTE_MODIFIERS, attributeModifiers);
                 }
             }
         }
     }
 
-    public static ItemAttributeModifiers removeModifier(ItemAttributeModifiers oldModifiers,ResourceLocation modifierID) {
+    public static ItemAttributeModifiers removeModifier(ItemAttributeModifiers oldModifiers, ResourceLocation modifierID) {
         ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();
         for (ItemAttributeModifiers.Entry entry : oldModifiers.modifiers()) {
             if (!entry.modifier().is(modifierID)) {
-                builder.add(entry.attribute(),entry.modifier(),entry.slot());
+                builder.add(entry.attribute(), entry.modifier(), entry.slot());
             }
         }
         return builder.build();
@@ -284,7 +280,7 @@ public class GulliversBlocks {
 
     }
 
-    public static Vec3 repositionRiders(Player player, Entity pEntity, EntityDimensions pDimensions, float pPartialTick, MountPosition mountPosition) {
+    public static Vec3 repositionRiders(LivingEntity livingEntity, Entity pEntity, EntityDimensions pDimensions, float pPartialTick, MountPosition mountPosition) {
 
         switch (mountPosition) {
             case LEFT_SHOULDER -> {
@@ -294,7 +290,7 @@ public class GulliversBlocks {
                 float y = .875f;
 
                 return new Vec3(x, pDimensions.height() * y, z)
-                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+                        .yRot(-livingEntity.yBodyRot * (float) (Math.PI / 180.0));
             }
             case RIGHT_SHOULDER -> {
                 float z = 0 * pDimensions.width();
@@ -303,7 +299,7 @@ public class GulliversBlocks {
                 float y = .8f;
 
                 return new Vec3(x, pDimensions.height() * y, z)
-                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+                        .yRot(-livingEntity.yBodyRot * (float) (Math.PI / 180.0));
             }
             case LEFT_HAND -> {
                 float z = 0.475f * pDimensions.width();
@@ -312,7 +308,7 @@ public class GulliversBlocks {
                 float y = .375f;
 
                 return new Vec3(x, pDimensions.height() * y, z)
-                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+                        .yRot(-livingEntity.yBodyRot * (float) (Math.PI / 180.0));
             }
             case RIGHT_HAND -> {
                 float z = 0.475f * pDimensions.width();
@@ -321,7 +317,14 @@ public class GulliversBlocks {
                 float y = .375f;
 
                 return new Vec3(x, pDimensions.height() * y, z)
-                        .yRot(-player.yBodyRot * (float) (Math.PI / 180.0));
+                        .yRot(-livingEntity.yBodyRot * (float) (Math.PI / 180.0));
+            }
+            case TOP -> {
+                float z = 0;
+                float x = 0;
+                float y = pDimensions.height();
+                return new Vec3(x, y, z)
+                        .yRot(-livingEntity.yBodyRot * (float) (Math.PI / 180.0));
             }
         }
         throw new RuntimeException("Unexpected mountpos:" + mountPosition);
@@ -331,9 +334,9 @@ public class GulliversBlocks {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    static boolean canPickup(Player player, InteractionHand hand, Entity entity) {
-        LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
-        HumanoidArm mainArm = player.getMainArm();
+    static boolean canPickup(LivingEntity vehicle, InteractionHand hand, Entity rider) {
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(vehicle);
+        HumanoidArm mainArm = vehicle.getMainArm();
         Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
         switch (mainArm) {
             case RIGHT -> {
@@ -366,7 +369,19 @@ public class GulliversBlocks {
             }
         }
 
-        double ratio = getRatio(player, entity);
+        double ratio = getRatio(vehicle, rider);
+
+        return ratio >= 6;
+    }
+
+    static boolean canRide(LivingEntity vehicle, Entity rider) {
+        LivingEntityDuck playerDuck = LivingEntityDuck.of(vehicle);
+        Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
+        if (mountPos.get(MountPosition.TOP) != null) {
+            return false;
+        }
+
+        double ratio = getRatio(vehicle, rider);
 
         return ratio >= 6;
     }
@@ -379,18 +394,18 @@ public class GulliversBlocks {
 
         if (mount2 != null) {
             mounts.put(pos1, mount2);
-            S2CSetMountPositionPacket.sendToTracking(player,pos1,mount2);
+            S2CSetMountPositionPacket.sendToTracking(player, pos1, mount2);
         } else {
             mounts.remove(pos1);
-            S2CRemoveMountPositionPacket.sendToTracking(player,pos1);
+            S2CRemoveMountPositionPacket.sendToTracking(player, pos1);
         }
 
         if (mount1 != null) {
             mounts.put(pos2, mount1);
-            S2CSetMountPositionPacket.sendToTracking(player,pos2, mount1);
+            S2CSetMountPositionPacket.sendToTracking(player, pos2, mount1);
         } else {
             mounts.remove(pos2);
-            S2CRemoveMountPositionPacket.sendToTracking(player,pos2);
+            S2CRemoveMountPositionPacket.sendToTracking(player, pos2);
         }
     }
 
@@ -533,6 +548,89 @@ public class GulliversBlocks {
 
             // parrot.getJumpControl().jump();
             //   parrot.getNavigation() .moveTo(0,0,0,1);
+        }
+    }
+
+    public static InteractionResult entityInteract(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        if (canPickup(player, hand, entity)) {
+            entity.startRiding(player);
+            LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
+            HumanoidArm mainArm = player.getMainArm();
+            Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
+            switch (mainArm) {
+                case RIGHT -> {
+                    switch (hand) {
+                        case MAIN_HAND -> {
+                            mountPos.put(MountPosition.RIGHT_HAND, entity);
+                        }
+                        case OFF_HAND -> {
+                            mountPos.put(MountPosition.LEFT_HAND, entity);
+                        }
+                    }
+                }
+                case LEFT -> {
+                    switch (hand) {
+                        case MAIN_HAND -> {
+                            mountPos.put(MountPosition.LEFT_HAND, entity);
+
+                        }
+                        case OFF_HAND -> {
+                            mountPos.put(MountPosition.RIGHT_HAND, entity);
+                        }
+                    }
+                }
+            }
+
+            if (entity instanceof ServerPlayer playerPassenger) {
+                ModCriteriaTriggers.PICKED_UP.trigger(playerPassenger);
+            }
+
+            return InteractionResult.sidedSuccess(world.isClientSide);
+        } else {
+            if (entity instanceof LivingEntity livingVehicle) {
+                if (canRide(livingVehicle, player)) {
+                    if (livingVehicle instanceof Parrot parrot) {
+                        if (parrot.isTame() && player.getUUID().equals(parrot.getOwnerUUID())) {
+                            if (!world.isClientSide) {
+                                parrot.setOrderedToSit(false);
+                                parrot.setInSittingPose(false);
+                                player.startRiding(parrot);
+                                parrot.setNoGravity(true);
+                            }
+                            return InteractionResult.sidedSuccess(world.isClientSide);
+                        }
+                    } else if (player.getMainHandItem().is(Items.STRING)) {
+                        if (canRide(livingVehicle, player)) {
+                            if (!world.isClientSide) {
+                                player.startRiding(livingVehicle);
+                                LivingEntityDuck.of(livingVehicle).getMountPositions().put(MountPosition.TOP, player);
+                                S2CSetMountPositionPacket.sendToTracking(livingVehicle, MountPosition.TOP, player);
+                                ModCriteriaTriggers.FORCE_RIDE.trigger((ServerPlayer) player);
+                            }
+                            return InteractionResult.sidedSuccess(world.isClientSide);
+                        }
+                    }
+                }
+            }
+        }
+        return InteractionResult.PASS;
+    }
+
+    public static void onStopRiding(Entity passenger, Entity vehicle) {
+        if (vehicle instanceof LivingEntity livingVehicle) {
+            Map<MountPosition, Entity> mountPositions = LivingEntityDuck.of(livingVehicle).getMountPositions();
+
+            MountPosition mountPosition = null;
+            for (Map.Entry<MountPosition, Entity> entry : mountPositions.entrySet()) {
+                if (entry.getValue() == passenger) {
+                    mountPosition = entry.getKey();
+                    break;
+                }
+            }
+            if (mountPosition != null) {
+                mountPositions.remove(mountPosition);
+                //S2CRemoveMountPositionPacket.sendToTracking(passenger, mountPosition);
+            }
         }
     }
 }

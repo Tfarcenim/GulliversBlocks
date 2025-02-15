@@ -3,11 +3,9 @@ package tfar.gulliversblocks.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
-import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 

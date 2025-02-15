@@ -1,8 +1,7 @@
-package tfar.gulliversblocks;
+package tfar.gulliversblocks.advancements;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,7 +32,7 @@ public class ReachSizeTrigger extends SimpleCriterionTrigger<ReachSizeTrigger.Tr
         );
 
         public static Criterion<TriggerInstance> reachSize(MinMaxBounds.Doubles targetSize) {
-            return ModCriteriaTriggers.REACH_SIZE_TRIGGER.createCriterion(new TriggerInstance(Optional.empty(), targetSize));
+            return ModCriteriaTriggers.REACH_SIZE.createCriterion(new TriggerInstance(Optional.empty(), targetSize));
         }
 
         public boolean matches(double scale) {

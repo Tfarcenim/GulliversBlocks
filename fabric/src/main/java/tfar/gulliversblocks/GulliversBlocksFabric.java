@@ -9,31 +9,19 @@ import net.fabricmc.fabric.api.registry.FabricBrewingRecipeRegistryBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectUtil;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potions;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.fml.config.ModConfig;
-import org.jetbrains.annotations.Nullable;
 import tfar.gulliversblocks.config.GulliversBlocksConfig;
-import tfar.gulliversblocks.duck.LivingEntityDuck;
-import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.events.LivingWaterCallbacks;
 import tfar.gulliversblocks.init.ModPotions;
 import tfar.gulliversblocks.network.PacketHandler;
-
-import java.util.Map;
 
 public class GulliversBlocksFabric implements ModInitializer {
     
@@ -76,7 +64,7 @@ public class GulliversBlocksFabric implements ModInitializer {
         // Use Fabric to bootstrap the Common mod.
         GulliversBlocks.init();
         PacketHandler.registerPackets();
-        UseEntityCallback.EVENT.register(this::interact);
+        UseEntityCallback.EVENT.register(GulliversBlocks::entityInteract);
 
         LivingWaterCallbacks.BREATHING.register((entity, result) -> {
             if(entity.level().isRainingAt(entity.blockPosition()) && entity.getBbHeight() <= GulliversBlocks.DROWN_IN_RAIN_SIZE &&
@@ -86,48 +74,6 @@ public class GulliversBlocksFabric implements ModInitializer {
         });
 
         NeoForgeConfigRegistry.INSTANCE.register(GulliversBlocks.MOD_ID, ModConfig.Type.SERVER,GulliversBlocksConfig.SERVER_SPEC);
-    }
-
-    InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-        if (GulliversBlocks.canPickup(player,hand,entity)) {
-            entity.startRiding(player);
-            LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
-            HumanoidArm mainArm = player.getMainArm();
-            Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
-            switch (mainArm) {
-                case RIGHT -> {
-                    switch (hand) {
-                        case MAIN_HAND -> {
-                            mountPos.put(MountPosition.RIGHT_HAND,entity);
-                        }
-                        case OFF_HAND -> {
-                            mountPos.put(MountPosition.LEFT_HAND,entity);
-                        }
-                    }
-                }
-                case LEFT -> {
-                    switch (hand) {
-                        case MAIN_HAND -> {
-                            mountPos.put(MountPosition.LEFT_HAND,entity);
-
-                        }
-                        case OFF_HAND -> {
-                            mountPos.put(MountPosition.RIGHT_HAND,entity);
-                        }
-                    }
-                }
-            }
-
-            return InteractionResult.sidedSuccess(world.isClientSide);
-        } else if (entity instanceof Parrot parrot) {
-            if (parrot.isTame() && player.getUUID().equals(parrot.getOwnerUUID())) {
-                parrot.setOrderedToSit(false);
-                parrot.setInSittingPose(false);
-                player.startRiding(parrot);
-                parrot.setNoGravity(true);
-            }
-        }
-        return InteractionResult.PASS;
     }
 
     //fabric implementation of neoforge event, see CommonHooks

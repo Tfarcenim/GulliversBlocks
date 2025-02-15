@@ -1,0 +1,35 @@
+{
+  "parent": "gulliversblocks:root",
+  "criteria": {
+    "giant": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {}
+          }
+        ]
+      },
+      "trigger": "gulliversblocks:picked_up"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "gulliversblocks.advancements.a_gaints_grasp.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:potion"
+    },
+    "title": {
+      "translate": "gulliversblocks.advancements.a_giants_grasp.title"
+    }
+  },
+  "requirements": [
+    [
+      "giant"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

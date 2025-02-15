@@ -7,7 +7,7 @@
           "max": 0.25
         }
       },
-      "trigger": "gulliversblocks:reach_size_trigger"
+      "trigger": "gulliversblocks:reach_size"
     }
   },
   "display": {

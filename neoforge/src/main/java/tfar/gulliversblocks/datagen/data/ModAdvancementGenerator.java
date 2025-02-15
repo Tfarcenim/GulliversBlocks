@@ -14,7 +14,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import tfar.gulliversblocks.GulliversBlocks;
-import tfar.gulliversblocks.ReachSizeTrigger;
+import tfar.gulliversblocks.advancements.ForceRideTrigger;
+import tfar.gulliversblocks.advancements.PickedUpTrigger;
+import tfar.gulliversblocks.advancements.ReachSizeTrigger;
 import tfar.gulliversblocks.TextComponents;
 import tfar.gulliversblocks.init.ModPotions;
 
@@ -23,21 +25,21 @@ import java.util.function.Consumer;
 //I want there to be a few advancements.
 //"Mixologist Extraordinaire"
 //Brew all 3 new potions
-//“Bigger and Better”
+//"Bigger and Better"
 //Drinking an Embiggening potion.
-//“Down to Size”
+//"Down to Size"
 //Drinking an Ensmallening potion.
-//“Ant”
+//"Ant"
 //Shrinking to 1/4th a block tall.
-//“Titan”
+//"Titan"
 //Growing to 16 blocks tall.
-//“Unlikely Steed”
+//"Unlikely Steed"
 //Riding any player/mob at a different size using string.
-//“A Giant’s Grasp”
+//"A Giant’s Grasp"
 //Being picked up by any player/mob at a different size
-//“It’s-a Me!”
+//"It’s-a Me!"
 //Eat a Super Mushroom (If added)
-//“Tiny Toadstool”
+//"Tiny Toadstool"
 //Eat a Mini Mushroom (If added)
 public class ModAdvancementGenerator implements AdvancementProvider.AdvancementGenerator {
     @Override
@@ -163,5 +165,36 @@ public class ModAdvancementGenerator implements AdvancementProvider.AdvancementG
                 .addCriterion("titan", ReachSizeTrigger.TriggerInstance.reachSize(MinMaxBounds.Doubles.atLeast(4)))
                 .save(saver, GulliversBlocks.id("titan"),existingFileHelper);
 
+
+        AdvancementHolder a_giants_grasp = Advancement.Builder.advancement()
+                .parent(advancementholder)
+                .display(
+                        Items.POTION,
+                        TextComponents.A_GIANTS_GRASP,
+                        TextComponents.A_GIANTS_GRASP_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion("giant", PickedUpTrigger.TriggerInstance.playerPickedUp(EntityPredicate.Builder.entity()))
+                .save(saver, GulliversBlocks.id("a_giants_grasp"),existingFileHelper);
+
+
+        AdvancementHolder unlikely_steed = Advancement.Builder.advancement()
+                .parent(advancementholder)
+                .display(
+                        Items.POTION,
+                        TextComponents.UNLIKELY_STEED,
+                        TextComponents.UNLIKELY_STEED_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion("steed", ForceRideTrigger.TriggerInstance.playerRiding(EntityPredicate.Builder.entity()))
+                .save(saver, GulliversBlocks.id("unlikely_steed"),existingFileHelper);
     }
 }

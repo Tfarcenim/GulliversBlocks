@@ -1,0 +1,35 @@
+{
+  "parent": "gulliversblocks:root",
+  "criteria": {
+    "steed": {
+      "conditions": {
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {}
+          }
+        ]
+      },
+      "trigger": "gulliversblocks:force_ride"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "gulliversblocks.advancements.unlikely_steed.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:potion"
+    },
+    "title": {
+      "translate": "gulliversblocks.advancements.unlikely_steed.title"
+    }
+  },
+  "requirements": [
+    [
+      "steed"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

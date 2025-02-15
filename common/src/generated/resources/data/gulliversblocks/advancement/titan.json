@@ -7,7 +7,7 @@
           "min": 4.0
         }
       },
-      "trigger": "gulliversblocks:reach_size_trigger"
+      "trigger": "gulliversblocks:reach_size"
     }
   },
   "display": {

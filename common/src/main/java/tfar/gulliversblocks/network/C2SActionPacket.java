@@ -52,12 +52,7 @@ public class C2SActionPacket implements C2SModPacket<RegistryFriendlyByteBuf>  {
                             if (entity instanceof LivingEntity living) {
                                 living.addEffect(new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE,100,0));
                             }
-
-
-
                             player.connection.send(new ClientboundSetPassengersPacket(player));
-                            playerDuck.getMountPositions().remove(MountPosition.RIGHT_HAND);
-                            S2CRemoveMountPositionPacket.sendToTracking(player,MountPosition.RIGHT_HAND);
                         }
                     }
                 }
