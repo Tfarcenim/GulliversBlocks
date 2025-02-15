@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import org.codehaus.plexus.util.StringUtils;
 import tfar.gulliversblocks.GulliversBlocks;
+import tfar.gulliversblocks.TextComponents;
 import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
 
@@ -49,6 +50,9 @@ public class ModLangProvider extends LanguageProvider {
         add("death.attack.rose",  "%1$s was pricked to death");
         add( "death.attack.rose.player", "%1$s walked into a rose bush while trying to escape %2$s");
         add("sleep.too_big","Too big to sleep in this bed");
+
+        addTextComponent(TextComponents.MIXOLOGIST_EXTRAORDINAIRE,"Mixologist Extraordinaire");
+        addTextComponent(TextComponents.MIXOLOGIST_EXTRAORDINAIRE_DESC,"Brew all 3 new potions");
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {
