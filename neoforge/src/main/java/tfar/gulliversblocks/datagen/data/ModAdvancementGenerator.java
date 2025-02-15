@@ -1,21 +1,24 @@
 package tfar.gulliversblocks.datagen.data;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.critereon.BrewedPotionTrigger;
-import net.minecraft.advancements.critereon.ChangeDimensionTrigger;
+import net.minecraft.advancements.*;
+import net.minecraft.advancements.critereon.*;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.TextComponents;
+import tfar.gulliversblocks.init.ModMobEffects;
+import tfar.gulliversblocks.init.ModPotions;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 //I want there to be a few advancements.
 //“Mixologist Extraordinaire”
@@ -42,7 +45,7 @@ public class ModAdvancementGenerator implements AdvancementProvider.AdvancementG
         AdvancementHolder advancementholder = Advancement.Builder.advancement()
                 .display(
                         Blocks.RED_NETHER_BRICKS,
-                        Component.translatable("advancements.nether.root.title"),
+                        TextComponents.ADVANCEMENT_ROOT,
                         Component.translatable("advancements.nether.root.description"),
                         ResourceLocation.withDefaultNamespace("textures/gui/advancements/backgrounds/nether.png"),
                         AdvancementType.TASK,
@@ -65,7 +68,71 @@ public class ModAdvancementGenerator implements AdvancementProvider.AdvancementG
                         true,
                         false
                 )
-                .addCriterion("potion", BrewedPotionTrigger.TriggerInstance.brewedPotion())
-                .save(saver, GulliversBlocks.id("nether/brew_potion"),existingFileHelper);
+                .addCriterion("upsize",CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.of(ModPotions.UPSIZE_II))))
+                .addCriterion("downsize",CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.of(ModPotions.DOWNSIZE_II))))
+                .addCriterion("renewal",CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.of(ModPotions.RENEWAL))))
+                .save(saver, GulliversBlocks.id("nether/brew_size_potion"),existingFileHelper);
+
+        AdvancementHolder big = Advancement.Builder.advancement()
+                .parent(advancementholder)
+                .display(
+                        Items.POTION,
+                        TextComponents.BIGGER_AND_BETTER,
+                        TextComponents.BIGGER_AND_BETTER_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false)
+             //   .addCriterion("effect", EffectsChangedTrigger.TriggerInstance.hasEffects(
+           //                     MobEffectsPredicate.Builder.effects()
+            //                            .and(ModMobEffects.UPSIZE)))
+                .addCriterion("potion_1", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.UPSIZE_I)).build())))
+
+                .addCriterion("potion_2", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.UPSIZE_II)).build())))
+
+                .addCriterion("potion_3", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.UPSIZE_III)).build())))
+
+                .addCriterion("potion_4", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.UPSIZE_IV)).build())))
+
+                .addCriterion("potion_5", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.UPSIZE_V)).build())))
+                .requirements(AdvancementRequirements.Strategy.OR)
+                .save(saver,GulliversBlocks.id("bigger_and_better"),existingFileHelper);
+
+
+        AdvancementHolder small = Advancement.Builder.advancement()
+                .parent(advancementholder)
+                .display(
+                        Items.POTION,
+                        TextComponents.DOWN_TO_SIZE,
+                        TextComponents.DOWN_TO_SIZE_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false)
+                .addCriterion("potion_1", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.DOWNSIZE_I)).build())))
+
+                .addCriterion("potion_2", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.DOWNSIZE_II)).build())))
+
+                .addCriterion("potion_3", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.DOWNSIZE_III)).build())))
+
+                .addCriterion("potion_4", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.DOWNSIZE_IV)).build())))
+
+                .addCriterion("potion_5", ConsumeItemTrigger.TriggerInstance.usedItem(ItemPredicate.Builder.item()
+                        .hasComponents(DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS,new PotionContents(ModPotions.DOWNSIZE_V)).build())))
+                .requirements(AdvancementRequirements.Strategy.OR)
+                .save(saver,GulliversBlocks.id("down_to_size"),existingFileHelper);
+
+
     }
 }

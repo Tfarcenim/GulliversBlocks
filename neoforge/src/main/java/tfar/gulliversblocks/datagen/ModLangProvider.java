@@ -53,6 +53,19 @@ public class ModLangProvider extends LanguageProvider {
 
         addTextComponent(TextComponents.MIXOLOGIST_EXTRAORDINAIRE,"Mixologist Extraordinaire");
         addTextComponent(TextComponents.MIXOLOGIST_EXTRAORDINAIRE_DESC,"Brew all 3 new potions");
+
+        addTextComponent(TextComponents.BIGGER_AND_BETTER,"Bigger and Better");
+        addTextComponent(TextComponents.BIGGER_AND_BETTER_DESC,"Drink an Embiggening Potion");
+
+        addTextComponent(TextComponents.DOWN_TO_SIZE,"Down to Size");
+        addTextComponent(TextComponents.DOWN_TO_SIZE_DESC,"Drink an Ensmallening Potion");
+
+        addTextComponent(TextComponents.ADVANCEMENT_ROOT,"Gulliver's Blocks");
+
+//“Bigger and Better”
+//Drinking an Embiggening potion.
+//“Down to Size”
+//Drinking an Ensmallening potion.
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

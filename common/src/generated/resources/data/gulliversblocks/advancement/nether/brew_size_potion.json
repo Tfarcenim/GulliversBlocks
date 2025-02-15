@@ -1,7 +1,22 @@
 {
   "parent": "gulliversblocks:root",
   "criteria": {
-    "potion": {
+    "downsize": {
+      "conditions": {
+        "potion": "gulliversblocks:downsize_ii"
+      },
+      "trigger": "minecraft:brewed_potion"
+    },
+    "renewal": {
+      "conditions": {
+        "potion": "gulliversblocks:renewal"
+      },
+      "trigger": "minecraft:brewed_potion"
+    },
+    "upsize": {
+      "conditions": {
+        "potion": "gulliversblocks:upsize_ii"
+      },
       "trigger": "minecraft:brewed_potion"
     }
   },
@@ -19,7 +34,13 @@
   },
   "requirements": [
     [
-      "potion"
+      "upsize"
+    ],
+    [
+      "downsize"
+    ],
+    [
+      "renewal"
     ]
   ],
   "sends_telemetry_event": true

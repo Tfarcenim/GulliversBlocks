@@ -1,0 +1,87 @@
+{
+  "parent": "gulliversblocks:root",
+  "criteria": {
+    "potion_1": {
+      "conditions": {
+        "item": {
+          "components": {
+            "minecraft:potion_contents": {
+              "potion": "gulliversblocks:downsize_i"
+            }
+          }
+        }
+      },
+      "trigger": "minecraft:consume_item"
+    },
+    "potion_2": {
+      "conditions": {
+        "item": {
+          "components": {
+            "minecraft:potion_contents": {
+              "potion": "gulliversblocks:downsize_ii"
+            }
+          }
+        }
+      },
+      "trigger": "minecraft:consume_item"
+    },
+    "potion_3": {
+      "conditions": {
+        "item": {
+          "components": {
+            "minecraft:potion_contents": {
+              "potion": "gulliversblocks:downsize_iii"
+            }
+          }
+        }
+      },
+      "trigger": "minecraft:consume_item"
+    },
+    "potion_4": {
+      "conditions": {
+        "item": {
+          "components": {
+            "minecraft:potion_contents": {
+              "potion": "gulliversblocks:downsize_iv"
+            }
+          }
+        }
+      },
+      "trigger": "minecraft:consume_item"
+    },
+    "potion_5": {
+      "conditions": {
+        "item": {
+          "components": {
+            "minecraft:potion_contents": {
+              "potion": "gulliversblocks:downsize_v"
+            }
+          }
+        }
+      },
+      "trigger": "minecraft:consume_item"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "gulliversblocks.advancements.down_to_size.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:potion"
+    },
+    "title": {
+      "translate": "gulliversblocks.advancements.down_to_size.title"
+    }
+  },
+  "requirements": [
+    [
+      "potion_1",
+      "potion_2",
+      "potion_3",
+      "potion_4",
+      "potion_5"
+    ]
+  ],
+  "sends_telemetry_event": true
+}
