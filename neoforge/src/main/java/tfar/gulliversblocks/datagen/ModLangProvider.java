@@ -68,10 +68,11 @@ public class ModLangProvider extends LanguageProvider {
         addTextComponent(TextComponents.TITAN,"Titan");
         addTextComponent(TextComponents.TITAN_DESC,"Grow to 16 blocks tall");
 
-//“Ant”
-//Shrinking to 1/4th a block tall.
-//“Titan”
-//Growing to 16 blocks tall.
+        addTextComponent(TextComponents.UNLIKELY_STEED,"Unlikely Steed");
+        addTextComponent(TextComponents.UNLIKELY_STEED_DESC,"Riding any player/mob at a different size using string.");
+
+        addTextComponent(TextComponents.A_GIANTS_GRASP,"A Giant's Grasp");
+        addTextComponent(TextComponents.A_GIANTS_GRASP_DESC,"Being picked up by any player/mob at a different size.");
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

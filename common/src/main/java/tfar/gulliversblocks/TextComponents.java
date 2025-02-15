@@ -23,5 +23,10 @@ public class TextComponents {
     public static final MutableComponent TITAN = Component.translatable(GulliversBlocks.MOD_ID+".advancements.titan.title");
     public static final MutableComponent TITAN_DESC = Component.translatable(GulliversBlocks.MOD_ID+".advancements.titan.description");
 
+    public static final MutableComponent UNLIKELY_STEED = Component.translatable(GulliversBlocks.MOD_ID+".advancements.unlikely_steed.title");
+    public static final MutableComponent UNLIKELY_STEED_DESC = Component.translatable(GulliversBlocks.MOD_ID+".advancements.unlikely_steed.description");
+
+    public static final MutableComponent A_GIANTS_GRASP = Component.translatable(GulliversBlocks.MOD_ID+".advancements.a_giants_grasp.title");
+    public static final MutableComponent A_GIANTS_GRASP_DESC = Component.translatable(GulliversBlocks.MOD_ID+".advancements.a_gaints_grasp.description");
 
 }

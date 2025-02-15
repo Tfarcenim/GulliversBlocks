@@ -28,7 +28,6 @@ public class ReachSizeTrigger extends SimpleCriterionTrigger<ReachSizeTrigger.Tr
                                 MinMaxBounds.Doubles.CODEC
                                         .optionalFieldOf("size", MinMaxBounds.Doubles.atLeast(0))
                                         .forGetter(TriggerInstance::size)
-                           //     ItemPredicate.CODEC.optionalFieldOf("item").forGetter(ConsumeItemTrigger.TriggerInstance::item)
                         )
                         .apply(instance, TriggerInstance::new)
         );
