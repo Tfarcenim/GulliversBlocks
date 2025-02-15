@@ -14,14 +14,14 @@ import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import tfar.gulliversblocks.GulliversBlocks;
+import tfar.gulliversblocks.ReachSizeTrigger;
 import tfar.gulliversblocks.TextComponents;
-import tfar.gulliversblocks.init.ModMobEffects;
 import tfar.gulliversblocks.init.ModPotions;
 
 import java.util.Optional;
 import java.util.function.Consumer;
 //I want there to be a few advancements.
-//“Mixologist Extraordinaire”
+//"Mixologist Extraordinaire"
 //Brew all 3 new potions
 //“Bigger and Better”
 //Drinking an Embiggening potion.
@@ -71,7 +71,7 @@ public class ModAdvancementGenerator implements AdvancementProvider.AdvancementG
                 .addCriterion("upsize",CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.of(ModPotions.UPSIZE_II))))
                 .addCriterion("downsize",CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.of(ModPotions.DOWNSIZE_II))))
                 .addCriterion("renewal",CriteriaTriggers.BREWED_POTION.createCriterion(new BrewedPotionTrigger.TriggerInstance(Optional.empty(), Optional.of(ModPotions.RENEWAL))))
-                .save(saver, GulliversBlocks.id("nether/brew_size_potion"),existingFileHelper);
+                .save(saver, GulliversBlocks.id("brew_size_potion"),existingFileHelper);
 
         AdvancementHolder big = Advancement.Builder.advancement()
                 .parent(advancementholder)
@@ -133,6 +133,35 @@ public class ModAdvancementGenerator implements AdvancementProvider.AdvancementG
                 .requirements(AdvancementRequirements.Strategy.OR)
                 .save(saver,GulliversBlocks.id("down_to_size"),existingFileHelper);
 
+        AdvancementHolder ant = Advancement.Builder.advancement()
+                .parent(advancementholder)
+                .display(
+                        Items.POTION,
+                        TextComponents.ANT,
+                        TextComponents.ANT_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion("titan", ReachSizeTrigger.TriggerInstance.reachSize(MinMaxBounds.Doubles.atMost(.25)))
+                .save(saver, GulliversBlocks.id("ant"),existingFileHelper);
+
+        AdvancementHolder titan = Advancement.Builder.advancement()
+                .parent(advancementholder)
+                .display(
+                        Items.POTION,
+                        TextComponents.TITAN,
+                        TextComponents.TITAN_DESC,
+                        null,
+                        AdvancementType.TASK,
+                        true,
+                        true,
+                        false
+                )
+                .addCriterion("titan", ReachSizeTrigger.TriggerInstance.reachSize(MinMaxBounds.Doubles.atLeast(4)))
+                .save(saver, GulliversBlocks.id("titan"),existingFileHelper);
 
     }
 }

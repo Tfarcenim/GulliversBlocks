@@ -45,10 +45,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.duck.PlayerDuck;
-import tfar.gulliversblocks.init.ModDamageTypes;
-import tfar.gulliversblocks.init.ModMobEffects;
-import tfar.gulliversblocks.init.ModPotions;
-import tfar.gulliversblocks.init.ModTags;
+import tfar.gulliversblocks.init.*;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
@@ -145,6 +142,7 @@ public class GulliversBlocks {
     public static void register() {
         ModMobEffects.boot();
         ModPotions.boot();
+        ModCriteriaTriggers.boot();
     }
 
     public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1 / 16d;
@@ -206,7 +204,9 @@ public class GulliversBlocks {
 
                 double safeFallScaling = Server.SAFE_FALL_DISTANCE_SCALING.get().function.applyAsDouble(gulliverScale);
                 addAttributeMultSafely(living, Attributes.SAFE_FALL_DISTANCE, safeFallScaling);
-
+                if (living instanceof ServerPlayer player) {
+                    ModCriteriaTriggers.REACH_SIZE_TRIGGER.trigger(player,gulliverScale);
+                }
             } else {
                 GulliversBlocks.LOG.warn("Tried to set gulliver scale out of bounds {}", newScale);
             }

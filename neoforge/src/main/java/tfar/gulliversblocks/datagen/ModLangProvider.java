@@ -62,10 +62,16 @@ public class ModLangProvider extends LanguageProvider {
 
         addTextComponent(TextComponents.ADVANCEMENT_ROOT,"Gulliver's Blocks");
 
-//“Bigger and Better”
-//Drinking an Embiggening potion.
-//“Down to Size”
-//Drinking an Ensmallening potion.
+        addTextComponent(TextComponents.ANT,"Ant");
+        addTextComponent(TextComponents.ANT_DESC,"Shrink to 1/4th a block tall");
+
+        addTextComponent(TextComponents.TITAN,"Titan");
+        addTextComponent(TextComponents.TITAN_DESC,"Grow to 16 blocks tall");
+
+//“Ant”
+//Shrinking to 1/4th a block tall.
+//“Titan”
+//Growing to 16 blocks tall.
     }
 
     protected void addPotion(Holder<Potion> potion, String name) {

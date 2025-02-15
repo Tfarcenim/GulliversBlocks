@@ -1,0 +1,31 @@
+{
+  "parent": "gulliversblocks:root",
+  "criteria": {
+    "titan": {
+      "conditions": {
+        "size": {
+          "max": 0.25
+        }
+      },
+      "trigger": "gulliversblocks:reach_size_trigger"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "gulliversblocks.advancements.ant.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:potion"
+    },
+    "title": {
+      "translate": "gulliversblocks.advancements.ant.title"
+    }
+  },
+  "requirements": [
+    [
+      "titan"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,6 +1,7 @@
 package tfar.gulliversblocks;
 
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -33,7 +34,9 @@ public class GulliversBlocksNeoForge {
     }
 
     private void register(RegisterEvent event) {
-        GulliversBlocks.register();
+        if (event.getRegistry() == BuiltInRegistries.BLOCK) {
+            GulliversBlocks.register();
+        }
     }
 
 }

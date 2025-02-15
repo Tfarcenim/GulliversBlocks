@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.UnboundedMapCodec;
 import tfar.gulliversblocks.config.GulliversBlocksConfig;
 
+import java.util.Map;
+
 public class GulliverScales {
 
 
@@ -12,6 +14,26 @@ public class GulliverScales {
 
     public static boolean valid(int gulliverScale) {
         return GulliversBlocksConfig.Server.SCALES.get().containsKey(gulliverScale);
+    }
+
+    public static int clamp(int gulliverScale) {
+        if (gulliverScale > 0) {
+            if (!valid(gulliverScale)) {
+                do {
+                    gulliverScale--;
+                } while (!valid(gulliverScale));
+            }
+            return gulliverScale;
+        } else if (gulliverScale < 0) {
+            if (!valid(gulliverScale)) {
+                do {
+                    gulliverScale++;
+                } while (!valid(gulliverScale));
+            }
+            return gulliverScale;
+        } else {
+            return 0;
+        }
     }
 
 }

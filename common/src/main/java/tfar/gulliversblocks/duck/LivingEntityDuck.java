@@ -15,9 +15,8 @@ public interface LivingEntityDuck {
     void gulliversBlocks$setGulliverScale(int gulliverScale);
 
     default void addGulliverScale(int scale) {
-        if (GulliverScales.valid(gulliversBlocks$getGulliverScale() + scale)) {
-            gulliversBlocks$setGulliverScale(gulliversBlocks$getGulliverScale() + scale);
-        }
+        int newScale = GulliverScales.clamp(scale + gulliversBlocks$getGulliverScale());
+            gulliversBlocks$setGulliverScale(newScale);
     }
 
     static LivingEntityDuck of(LivingEntity living) {

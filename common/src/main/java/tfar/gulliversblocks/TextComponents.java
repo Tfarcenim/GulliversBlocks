@@ -17,6 +17,11 @@ public class TextComponents {
     public static final MutableComponent DOWN_TO_SIZE = Component.translatable(GulliversBlocks.MOD_ID+".advancements.down_to_size.title");
     public static final MutableComponent DOWN_TO_SIZE_DESC = Component.translatable(GulliversBlocks.MOD_ID+".advancements.down_to_size.description");
 
+    public static final MutableComponent ANT = Component.translatable(GulliversBlocks.MOD_ID+".advancements.ant.title");
+    public static final MutableComponent ANT_DESC = Component.translatable(GulliversBlocks.MOD_ID+".advancements.ant.description");
+
+    public static final MutableComponent TITAN = Component.translatable(GulliversBlocks.MOD_ID+".advancements.titan.title");
+    public static final MutableComponent TITAN_DESC = Component.translatable(GulliversBlocks.MOD_ID+".advancements.titan.description");
 
 
 }
