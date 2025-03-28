@@ -92,6 +92,7 @@ public class GulliversBlocks {
             }
             return CompoundEventResult.pass();
         });
+        //Cnan run clientside
         EntityEvent.LIVING_HURT.register((livingEntity, damageSource, v) -> {
 
             List<Entity> passengers = livingEntity.getPassengers();
@@ -113,6 +114,7 @@ public class GulliversBlocks {
     }
 
     public static void checkDrop(LivingEntity living, MountPosition mountPosition) {
+        if (living.level().isClientSide)return;
         LivingEntityDuck livingEntityDuck = LivingEntityDuck.of(living);
 
         Map<MountPosition, Entity> mountPositions = livingEntityDuck.getMountPositions();
