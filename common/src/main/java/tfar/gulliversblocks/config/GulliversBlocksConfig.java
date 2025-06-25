@@ -34,7 +34,7 @@ public class GulliversBlocksConfig {
         map.put(-1,1/4f);
         map.put(0,1);
         map.put(1,2);
-        map.put(2,8);
+        map.put(2,4);
         return map;
     }
 
@@ -60,7 +60,7 @@ public class GulliversBlocksConfig {
             MAX_HEALTH_SCALING = builder.defineEnum("generic.max_health",Scaling.LINEAR);
             MINIMUM_MAX_HEALTH_SCALE = builder.defineInRange("minimum_max_health_scale",.5,0,1);
             ATTACK_DAMAGE_SCALING = builder.defineEnum("generic.attack_damage",Scaling.SQUARE_ROOT);
-            MOVEMENT_SPEED_SCALING = builder.defineEnum("generic.movement_speed",Scaling.INVERSE_CUBE_ROOT);
+            MOVEMENT_SPEED_SCALING = builder.defineEnum("generic.movement_speed",Scaling.INVERSE_SQUARE_ROOT);
             FALL_DAMAGE_MULTIPLIER_SCALING = builder.defineEnum("generic.fall_damage_multiplier",Scaling.LINEAR);
             SAFE_FALL_DISTANCE_SCALING = builder.defineEnum("generic.safe_fall_distance",Scaling.INVERSE_SQUARE_ROOT);
             builder.pop();

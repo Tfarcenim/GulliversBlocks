@@ -20,6 +20,7 @@ import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -29,7 +30,8 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
 
     @Shadow public abstract double getAttributeValue(Holder<Attribute> pAttribute);
 
-    Map<MountPosition,Entity> mountPositions = new EnumMap<>(MountPosition.class);
+    @Unique
+    Map<MountPosition,Entity> gulliversBlocks$mountPositions = new EnumMap<>(MountPosition.class);
 
     @Override
     protected void positionRider(Entity passenger, MoveFunction callback) {
@@ -38,13 +40,29 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
 
     @Override
     public Map<MountPosition, Entity> getMountPositions() {
-        return mountPositions;
+        return Collections.unmodifiableMap(gulliversBlocks$mountPositions);
+    }
+
+    @Override
+    public void addMount(MountPosition position, Entity entity) {
+        gulliversBlocks$mountPositions.put(position, entity);
+        if (GulliversBlocks.DEV) {
+            GulliversBlocks.LOG.info("{} picked up {} in position {}",this,entity,position);
+        }
+    }
+
+    @Override
+    public void removeMount(MountPosition position) {
+        Entity remove = gulliversBlocks$mountPositions.remove(position);
+        if (GulliversBlocks.DEV) {
+            GulliversBlocks.LOG.info("{} removed {} from position {}",this,remove,position);
+        }
     }
 
     @Override
     protected Vec3 getPassengerAttachmentPoint(Entity pEntity, EntityDimensions pDimensions, float pPartialTick) {
         MountPosition mountPos = null;
-        for (Map.Entry<MountPosition,Entity> entry: mountPositions.entrySet()) {
+        for (Map.Entry<MountPosition,Entity> entry: gulliversBlocks$mountPositions.entrySet()) {
             if (entry.getValue() == pEntity) {
                 mountPos = entry.getKey();
             }
@@ -55,6 +73,11 @@ public abstract class LivingEntityMixin extends Entity implements LivingEntityDu
         }
 
         return GulliversBlocks.repositionRiders((LivingEntity)(Object)this,pEntity,pDimensions,pPartialTick,mountPos);
+    }
+
+    @Inject(method = "serverAiStep",at = @At("HEAD"))
+    private void onEntityTick(CallbackInfo ci) {
+        GulliversBlocks.onLivingTick((LivingEntity) (Object)this);
     }
 
     @Unique

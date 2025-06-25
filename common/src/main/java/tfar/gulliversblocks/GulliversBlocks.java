@@ -7,6 +7,7 @@ import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -30,7 +31,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -44,8 +44,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.init.*;
+import tfar.gulliversblocks.network.client.S2CDropEntityPacket;
 import tfar.gulliversblocks.network.client.S2CRemoveMountPositionPacket;
 import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
+import tfar.gulliversblocks.platform.Services;
 import virtuoel.pehkui.api.*;
 
 import java.util.List;
@@ -61,6 +63,8 @@ public class GulliversBlocks {
     public static final String MOD_ID = "gulliversblocks";
     public static final String MOD_NAME = "Gulliver's Blocks";
     public static final Logger LOG = LoggerFactory.getLogger(MOD_NAME);
+
+    public static final boolean DEV = Services.PLATFORM.isDevelopmentEnvironment();
 
     // The loader specific projects are able to import and use any code from the common project. This allows you to
     // write the majority of your code here and load it from your loader specific projects. This example has some
@@ -92,6 +96,23 @@ public class GulliversBlocks {
             }
             return CompoundEventResult.pass();
         });
+
+
+        InteractionEvent.RIGHT_CLICK_BLOCK.register((player, interactionHand, blockPos, direction) -> {
+            List<Entity> passengers = player.getPassengers();
+            if (!player.level().isClientSide && !passengers.isEmpty()) {
+                LivingEntityDuck duck = LivingEntityDuck.of(player);
+                MountPosition position = getPosition(player,interactionHand);
+                if (duck.getMountPositions().containsKey(position)) {
+                    Entity entity = duck.getMountPositions().get(position);
+                    entity.stopRiding();
+                    entity.setPos(blockPos.relative(direction).getBottomCenter());
+                    return EventResult.interruptDefault();
+                }
+            }
+            return EventResult.pass();
+        });
+
         //Cnan run clientside
         EntityEvent.LIVING_HURT.register((livingEntity, damageSource, v) -> {
 
@@ -127,7 +148,7 @@ public class GulliversBlocks {
 
             if (shouldDrop) {
                 rightHandEntity.stopRiding();
-                livingEntityDuck.getMountPositions().remove(mountPosition);
+                livingEntityDuck.removeMount(mountPosition);
                 S2CRemoveMountPositionPacket.sendToTracking(living, mountPosition);
             }
         }
@@ -135,6 +156,20 @@ public class GulliversBlocks {
 
     public static boolean eitherHandHas(LivingEntity living, Predicate<ItemStack> stackPredicate) {
         return stackPredicate.test(living.getMainHandItem()) || stackPredicate.test(living.getOffhandItem());
+    }
+
+    public static MountPosition getPosition(LivingEntity entity,InteractionHand hand) {
+        HumanoidArm mainArm = entity.getMainArm();
+        return switch (mainArm){
+            case RIGHT -> switch (hand) {
+                case OFF_HAND -> MountPosition.LEFT_HAND;
+                case MAIN_HAND -> MountPosition.RIGHT_HAND;
+            };
+            case LEFT -> switch (hand) {
+                case OFF_HAND -> MountPosition.RIGHT_HAND;
+                case MAIN_HAND -> MountPosition.LEFT_HAND;
+            };
+        };
     }
 
     public static void register() {
@@ -279,7 +314,6 @@ public class GulliversBlocks {
 
     public static void addAttributeMultSafely(LivingEntity entity, Holder<Attribute> attribute, double value) {
         addAttributeSafely(entity, attribute, new AttributeModifier(MODIFIER_ID, value - 1, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
-
     }
 
     public static Vec3 repositionRiders(LivingEntity livingEntity, Entity pEntity, EntityDimensions pDimensions, float pPartialTick, MountPosition mountPosition) {
@@ -395,18 +429,18 @@ public class GulliversBlocks {
         Entity mount2 = mounts.get(pos2);
 
         if (mount2 != null) {
-            mounts.put(pos1, mount2);
+            playerDuck.addMount(pos1, mount2);
             S2CSetMountPositionPacket.sendToTracking(player, pos1, mount2);
         } else {
-            mounts.remove(pos1);
+            playerDuck.removeMount(pos1);
             S2CRemoveMountPositionPacket.sendToTracking(player, pos1);
         }
 
         if (mount1 != null) {
-            mounts.put(pos2, mount1);
+            playerDuck.addMount(pos2, mount1);
             S2CSetMountPositionPacket.sendToTracking(player, pos2, mount1);
         } else {
-            mounts.remove(pos2);
+            playerDuck.removeMount(pos2);
             S2CRemoveMountPositionPacket.sendToTracking(player, pos2);
         }
     }
@@ -553,35 +587,43 @@ public class GulliversBlocks {
         }
     }
 
-    public static InteractionResult entityInteract(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
-        if (canPickup(player, hand, entity)) {
-            entity.startRiding(player);
-            LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
-            HumanoidArm mainArm = player.getMainArm();
-            Map<MountPosition, Entity> mountPos = playerDuck.getMountPositions();
-            switch (mainArm) {
-                case RIGHT -> {
-                    switch (hand) {
-                        case MAIN_HAND -> {
-                            mountPos.put(MountPosition.RIGHT_HAND, entity);
-                        }
-                        case OFF_HAND -> {
-                            mountPos.put(MountPosition.LEFT_HAND, entity);
-                        }
-                    }
-                }
-                case LEFT -> {
-                    switch (hand) {
-                        case MAIN_HAND -> {
-                            mountPos.put(MountPosition.LEFT_HAND, entity);
+    public static boolean isBeingHeldByGulliver(LivingEntity entity,Entity passenger) {
+        LivingEntityDuck duck = LivingEntityDuck.of(entity);
+        for (Entity entity1 : duck.getMountPositions().values()) {
+            if (entity1 == passenger) return true;
+        }
+        return false;
+    }
 
-                        }
-                        case OFF_HAND -> {
-                            mountPos.put(MountPosition.RIGHT_HAND, entity);
-                        }
-                    }
-                }
+    public static void onLivingTick(LivingEntity living) {
+        LivingEntityDuck duck = LivingEntityDuck.of(living);
+        for (Map.Entry<MountPosition,Entity> entry : duck.getMountPositions().entrySet()) {
+            MountPosition mountPosition = entry.getKey();
+            Entity entity = entry.getValue();
+
+            if (entity.getVehicle() != living) {
+                LOG.error("Desync between {} and {} in position {} detected, correcting",living,entity,mountPosition);
+                duck.removeMount(mountPosition);
             }
+
+            if (!canRide(living,entity)) {
+                entity.stopRiding();
+                duck.removeMount(mountPosition);
+                S2CRemoveMountPositionPacket.sendToTracking(living, mountPosition);
+            }
+        }
+    }
+
+    public static InteractionResult entityInteract(Player player, Level world, InteractionHand hand, Entity entity) {
+        if (canPickup(player, hand, entity)) {
+            boolean worked = entity.startRiding(player);
+            if (!worked) {
+                return InteractionResult.PASS;
+            }
+            LivingEntityDuck playerDuck = LivingEntityDuck.of(player);
+            MountPosition mountPosition = getPosition(player,hand);
+
+            playerDuck.addMount(mountPosition, entity);
 
             if (entity instanceof ServerPlayer playerPassenger) {
                 ModCriteriaTriggers.PICKED_UP.trigger(playerPassenger);
@@ -605,7 +647,7 @@ public class GulliversBlocks {
                         if (canRide(livingVehicle, player)) {
                             if (!world.isClientSide) {
                                 player.startRiding(livingVehicle);
-                                LivingEntityDuck.of(livingVehicle).getMountPositions().put(MountPosition.TOP, player);
+                                LivingEntityDuck.of(livingVehicle).addMount(MountPosition.TOP, player);
                                 S2CSetMountPositionPacket.sendToTracking(livingVehicle, MountPosition.TOP, player);
                                 ModCriteriaTriggers.FORCE_RIDE.trigger((ServerPlayer) player);
                             }
@@ -620,7 +662,8 @@ public class GulliversBlocks {
 
     public static void onStopRiding(Entity passenger, Entity vehicle) {
         if (vehicle instanceof LivingEntity livingVehicle) {
-            Map<MountPosition, Entity> mountPositions = LivingEntityDuck.of(livingVehicle).getMountPositions();
+            LivingEntityDuck duck = LivingEntityDuck.of(livingVehicle);
+            Map<MountPosition, Entity> mountPositions = duck.getMountPositions();
 
             MountPosition mountPosition = null;
             for (Map.Entry<MountPosition, Entity> entry : mountPositions.entrySet()) {
@@ -630,8 +673,10 @@ public class GulliversBlocks {
                 }
             }
             if (mountPosition != null) {
-                mountPositions.remove(mountPosition);
-                //S2CRemoveMountPositionPacket.sendToTracking(passenger, mountPosition);
+                duck.removeMount(mountPosition);
+                if (vehicle instanceof ServerPlayer player) {
+                    S2CDropEntityPacket.sendTo(player,mountPosition);
+                }
             }
         }
     }

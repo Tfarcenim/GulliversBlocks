@@ -64,7 +64,7 @@ public class GulliversBlocksFabric implements ModInitializer {
         // Use Fabric to bootstrap the Common mod.
         GulliversBlocks.init();
         PacketHandler.registerPackets();
-        UseEntityCallback.EVENT.register(GulliversBlocks::entityInteract);
+        UseEntityCallback.EVENT.register((player, world, hand, entity1, hitResult) -> GulliversBlocks.entityInteract(player, world, hand, entity1));
 
         LivingWaterCallbacks.BREATHING.register((entity, result) -> {
             if(entity.level().isRainingAt(entity.blockPosition()) && entity.getBbHeight() <= GulliversBlocks.DROWN_IN_RAIN_SIZE &&

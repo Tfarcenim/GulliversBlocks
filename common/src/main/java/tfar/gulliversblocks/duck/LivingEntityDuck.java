@@ -11,6 +11,9 @@ public interface LivingEntityDuck {
 
     Map<MountPosition, Entity> getMountPositions();
 
+    void addMount(MountPosition position,Entity entity);
+    void removeMount(MountPosition position);
+
     int gulliversBlocks$getGulliverScale();
     void gulliversBlocks$setGulliverScale(int gulliverScale);
 

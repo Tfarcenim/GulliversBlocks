@@ -13,7 +13,6 @@ import net.minecraft.world.item.Items;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
-import tfar.gulliversblocks.duck.PlayerDuck;
 import tfar.gulliversblocks.network.C2SActionPacket;
 import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
 
@@ -23,15 +22,7 @@ import java.util.Map;
 public class ModClient {
 
     public static void onRightClickEmpty(Player player, InteractionHand hand) {
-        boolean sneak = player.isCrouching();
-        List<Entity> passengers = player.getPassengers();
-        if (!passengers.isEmpty()) {
-            if (sneak) {
-                Entity passenger = passengers.getFirst();
-                passenger.stopRiding();
-                C2SDropHeldEntityPacket.send();
-            }
-        }
+
     }
 
     public static void onLeftClickEmpty(Player player) {
