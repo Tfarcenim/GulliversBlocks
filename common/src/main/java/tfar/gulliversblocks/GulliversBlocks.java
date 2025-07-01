@@ -7,6 +7,7 @@ import dev.architectury.event.events.common.InteractionEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,6 +42,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.init.*;
@@ -50,6 +52,7 @@ import tfar.gulliversblocks.network.client.S2CSetMountPositionPacket;
 import tfar.gulliversblocks.platform.Services;
 import virtuoel.pehkui.api.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -612,6 +615,14 @@ public class GulliversBlocks {
                 S2CRemoveMountPositionPacket.sendToTracking(living, mountPosition);
             }
         }
+
+        List<Entity> passengers = new ArrayList<>(living.getPassengers());
+
+        for (Entity entity : passengers) {
+            if (!onAttemptRide(entity,living)) {
+                entity.stopRiding();
+            }
+        }
     }
 
     public static InteractionResult entityInteract(Player player, Level world, InteractionHand hand, Entity entity) {
@@ -679,5 +690,21 @@ public class GulliversBlocks {
                 }
             }
         }
+    }
+
+    public static boolean onAttemptRide(Entity entity, Entity vehicle) {
+        double scale0 = getScale(entity);
+        double scale1 = getScale(vehicle);
+        boolean b = scale0 / scale1 < Server.MAX_RIDING_RATIO.get();
+        if (!b && entity instanceof ServerPlayer player) {
+            player.displayClientMessage(Component.literal("Too big to ride"),true);
+        }
+
+        return b;
+    }
+
+    public static double getScale(Entity entity) {
+        ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
+        return scaleData.getScale();
     }
 }

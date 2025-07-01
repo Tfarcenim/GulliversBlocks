@@ -10,6 +10,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
@@ -34,6 +35,11 @@ public class GulliversBlocksNeoForge {
         // Use NeoForge to bootstrap the Common mod.
         GulliversBlocks.init();
         NeoForge.EVENT_BUS.addListener(this::entityInteract);
+        NeoForge.EVENT_BUS.addListener(this::tryRide);
+    }
+
+    void tryRide(EntityMountEvent event) {
+
     }
 
     void entityInteract(PlayerInteractEvent.EntityInteractSpecific event) {

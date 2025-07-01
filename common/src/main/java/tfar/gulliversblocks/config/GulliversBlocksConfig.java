@@ -33,8 +33,8 @@ public class GulliversBlocksConfig {
         map.put(-2,1/8f);
         map.put(-1,1/4f);
         map.put(0,1);
-        map.put(1,2);
-        map.put(2,4);
+        map.put(1,4);
+        map.put(2,8);
         return map;
     }
 
@@ -50,6 +50,7 @@ public class GulliversBlocksConfig {
 
         public static ConfigHelper.ConfigObject<Map<Integer,Double>> SCALES;
 
+        public static ModConfigSpec.DoubleValue MAX_RIDING_RATIO;
 
         public Server(ModConfigSpec.Builder builder) {
             builder.push("scaling");
@@ -63,6 +64,7 @@ public class GulliversBlocksConfig {
             MOVEMENT_SPEED_SCALING = builder.defineEnum("generic.movement_speed",Scaling.INVERSE_SQUARE_ROOT);
             FALL_DAMAGE_MULTIPLIER_SCALING = builder.defineEnum("generic.fall_damage_multiplier",Scaling.LINEAR);
             SAFE_FALL_DISTANCE_SCALING = builder.defineEnum("generic.safe_fall_distance",Scaling.INVERSE_SQUARE_ROOT);
+            MAX_RIDING_RATIO = builder.defineInRange("max_riding_ratio",2,1,Double.MAX_VALUE);
             builder.pop();
         }
     }
