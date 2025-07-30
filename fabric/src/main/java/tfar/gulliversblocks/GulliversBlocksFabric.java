@@ -73,6 +73,8 @@ public class GulliversBlocksFabric implements ModInitializer {
             }
         });
 
+        GulliversBlocks.setup();
+
         NeoForgeConfigRegistry.INSTANCE.register(GulliversBlocks.MOD_ID, ModConfig.Type.SERVER,GulliversBlocksConfig.SERVER_SPEC);
     }
 

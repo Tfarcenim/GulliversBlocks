@@ -47,6 +47,7 @@ public class GulliversBlocksConfig {
         public static ModConfigSpec.ConfigValue<Scaling> MOVEMENT_SPEED_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> FALL_DAMAGE_MULTIPLIER_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> SAFE_FALL_DISTANCE_SCALING;
+        public static ModConfigSpec.ConfigValue<Scaling> THROWN_POTION_MOTION_SCALING;
 
         public static ConfigHelper.ConfigObject<Map<Integer,Double>> SCALES;
 
@@ -65,6 +66,7 @@ public class GulliversBlocksConfig {
             FALL_DAMAGE_MULTIPLIER_SCALING = builder.defineEnum("generic.fall_damage_multiplier",Scaling.LINEAR);
             SAFE_FALL_DISTANCE_SCALING = builder.defineEnum("generic.safe_fall_distance",Scaling.INVERSE_SQUARE_ROOT);
             MAX_RIDING_RATIO = builder.defineInRange("max_riding_ratio",2,1,Double.MAX_VALUE);
+            THROWN_POTION_MOTION_SCALING = builder.defineEnum("thrown_potion_scaling",Scaling.SQUARE_ROOT);
             builder.pop();
         }
     }

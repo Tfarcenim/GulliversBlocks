@@ -137,6 +137,10 @@ public class GulliversBlocks {
         });
     }
 
+    public static void setup() {
+        EntityType.POTION.clientTrackingRange = 8;
+    }
+
     public static void checkDrop(LivingEntity living, MountPosition mountPosition) {
         if (living.level().isClientSide)return;
         LivingEntityDuck livingEntityDuck = LivingEntityDuck.of(living);
@@ -179,6 +183,7 @@ public class GulliversBlocks {
         ModMobEffects.boot();
         ModPotions.boot();
         ModCriteriaTriggers.boot();
+        CustomScaleModifiers.init();
     }
 
     public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1 / 16d;
@@ -201,6 +206,7 @@ public class GulliversBlocks {
                 ScaleData data = type.getScaleData(living);
                 Boolean persist = data.getPersistence();
                 data.resetScale();
+                data.getBaseValueModifiers().removeIf(scaleModifier -> scaleModifier instanceof GulliverScaleModifier);
                 data.setPersistence(persist);
             }
 
@@ -219,6 +225,7 @@ public class GulliversBlocks {
                 scaleData.setScaleTickDelay(40);
                 scaleData.setPersistence(true);
                 scaleData.setTargetScale((float) gulliverScale);
+                //scaleData.getBaseValueModifiers().add(CustomScaleModifiers.CUSTOM_MOTION);
 
                 if (living instanceof Player player) {
                     //multiplying by -1 is 0

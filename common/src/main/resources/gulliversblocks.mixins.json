@@ -9,7 +9,8 @@
     "EntityMixin",
     "LivingEntityMixin",
     "MobMixin",
-    "PlayerMixin"
+    "PlayerMixin",
+    "ThrowablePotionItemMixin"
   ],
   "client": [
     "HumanoidModelMixin",
