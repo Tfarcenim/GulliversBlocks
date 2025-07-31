@@ -709,4 +709,8 @@ public class GulliversBlocks {
         ScaleData scaleData = ScaleTypes.BASE.getScaleData(entity);
         return scaleData.getScale();
     }
+
+    public static double changeClimbingSpeed(LivingEntity livingEntity, double constant) {
+        return constant *4;
+    }
 }
