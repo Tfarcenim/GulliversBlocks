@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -23,6 +22,7 @@ import net.minecraft.world.entity.ai.attributes.*;
 import net.minecraft.world.entity.animal.Parrot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.FishingRodItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -42,7 +42,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.config.GulliversBlocksConfig.Server;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.init.*;
@@ -80,7 +79,7 @@ public class GulliversBlocks {
         // the platform specific approach.
         InteractionEvent.FARMLAND_TRAMPLE.register((world, pos, state, distance, entity) -> {
             if (entity instanceof LivingEntity living) {
-                if (living.getBbHeight() <= GulliversBlocks.TRAMPLE_FARMLAND_SIZE) {
+                if (living.getBbHeight() <= Server.TRAMPLE_FARMLAND_SIZE.get()) {
                     return EventResult.interruptFalse();
                 }
             }
@@ -89,7 +88,7 @@ public class GulliversBlocks {
         InteractionEvent.RIGHT_CLICK_ITEM.register((player, interactionHand) -> {
             ItemStack stack = player.getItemInHand(interactionHand);
             if (stack.getItem() instanceof FishingRodItem) {
-                if (player.fishing != null && Server.SCALES.get().get(LivingEntityDuck.of(player).gulliversBlocks$getGulliverScale()) <= FISHING_ROD_GRAPPLE_SCALE) {
+                if (player.fishing != null && Server.SCALES.get().get(LivingEntityDuck.of(player).gulliversBlocks$getGulliverScale()) <= Server.FISHING_ROD_GRAPPLE_SCALE.get()) {
                     Vec3 playerPos = player.position();
                     Vec3 fishingPos = player.fishing.position();
                     Vec3 dist = fishingPos.subtract(playerPos);
@@ -186,16 +185,6 @@ public class GulliversBlocks {
         CustomScaleModifiers.init();
     }
 
-    public static final double TRAMPLE_FARMLAND_SIZE = 1.8 * 1 / 16d;
-    public static final double DROWN_IN_RAIN_SIZE = 1.8 * 1 / 16d;
-    public static final double PRESSURE_PLATE_SIZE = 1.8 * 1 / 16d;
-    public static final double CACTUS_PRICK_SIZE = 1.8 * 1 / 16d;
-    public static final double CLIMB_BLOCKS_SIZE = 1 / 2d;
-    public static final double TRAMPLE_RATIO = 8;
-    public static final double PAPER_FLOAT_SIZE = 1 / 2d;
-    public static final double FISHING_ROD_GRAPPLE_SCALE = 1 / 16d;
-    public static final double MAX_SLEEPING_SIZE = 1.25;
-
 
     //public static final UUID GULLIVER = UUID.fromString("fbccf38e-8c5e-495a-a269-1ee614baef61");
     public static final ResourceLocation MODIFIER_ID = GulliversBlocks.id("attribute_modifier");
@@ -247,6 +236,12 @@ public class GulliversBlocks {
 
                 double safeFallScaling = Server.SAFE_FALL_DISTANCE_SCALING.get().function.applyAsDouble(gulliverScale);
                 addAttributeMultSafely(living, Attributes.SAFE_FALL_DISTANCE, safeFallScaling);
+
+                double gravityScaling = Server.GRAVITY_SCALING.get().function.applyAsDouble(gulliverScale);
+                addAttributeMultSafely(living, Attributes.GRAVITY, gravityScaling);
+
+                double jumpScaling = Server.JUMP_SCALING.get().function.applyAsDouble(gulliverScale);
+                addAttributeMultSafely(living, Attributes.JUMP_STRENGTH, jumpScaling);
                 if (living instanceof ServerPlayer player) {
                     ModCriteriaTriggers.REACH_SIZE.trigger(player, gulliverScale);
                 }
@@ -265,7 +260,7 @@ public class GulliversBlocks {
         if (!player.level().isClientSide) {
             ItemStack hand = player.getMainHandItem();
             ItemStack off = player.getOffhandItem();
-            if (player.getBbHeight() <= PAPER_FLOAT_SIZE && (hand.is(Items.PAPER) || off.is(Items.PAPER))) {
+            if (player.getBbHeight() <= Server.PAPER_FLOAT_SIZE.get() && eitherHandHas(player,stack -> stack.is(Items.PAPER))) {
                 player.addEffect(new MobEffectInstance(MobEffects.SLOW_FALLING, 5, 0, false, false));
             }
             if (hand.is(Items.STICK)) {
@@ -488,7 +483,7 @@ public class GulliversBlocks {
     }
 
     public static boolean conditionalImmunity(Entity entity, DamageSource damageSource, boolean vanillaImmune) {
-        if (damageSource.is(DamageTypes.CACTUS) && entity.getBbHeight() <= CACTUS_PRICK_SIZE) {
+        if (damageSource.is(DamageTypes.CACTUS) && entity.getBbHeight() <= Server.CACTUS_PRICK_SIZE.get()) {
             return true;
         }
         return vanillaImmune;
@@ -496,7 +491,7 @@ public class GulliversBlocks {
 
     public static void onInsideBlock(BlockBehaviour block, BlockState pState, Level pLevel, BlockPos pPos, Entity pEntity) {
         if (block == Blocks.ROSE_BUSH) {
-            if (pEntity.getBbHeight() <= CACTUS_PRICK_SIZE) {
+            if (pEntity.getBbHeight() <= Server.CACTUS_PRICK_SIZE.get()) {
                 pEntity.hurt(pLevel.damageSources().source(ModDamageTypes.ROSE), 1.0F);
             }
         }
@@ -507,7 +502,7 @@ public class GulliversBlocks {
             Entity entity = entityCollisionContext.getEntity();
             if (entity != null) {
                 if (blockBehaviour instanceof LeavesBlock) {
-                    if (entity.getBbHeight() <= CLIMB_BLOCKS_SIZE) {
+                    if (entity.getBbHeight() <= Server.CLIMB_BLOCKS_SIZE.get()) {
                         cir.setReturnValue(Shapes.empty());
                     }
                 }
@@ -516,12 +511,12 @@ public class GulliversBlocks {
     }
 
     public static boolean canClimb(LivingEntity living, BlockState state) {
-        if (living.getBbHeight() <= CLIMB_BLOCKS_SIZE) {
+        if (living.getBbHeight() <= Server.CLIMB_BLOCKS_SIZE.get()) {
             if (state.is(ModTags.Blocks.CLIMBABLE_WHEN_SMALL)) {
                 return true;
             }
 
-            if (living.getMainHandItem().is(Items.SLIME_BALL) || living.getOffhandItem().is(Items.SLIME_BALL)) {
+            if (eitherHandHas(living,stack -> stack.is(Items.SLIME_BALL))) {
                 Vec3 look = living.getLookAngle();
                 Vec3 movementDirection = look.scale(.05);
                 Vec3 pred = living.position().add(movementDirection.x, 0, movementDirection.z);
@@ -557,7 +552,7 @@ public class GulliversBlocks {
     public static void onPushed(LivingEntity pusher, Entity pushed) {
         if (!pushed.isPassenger() && pushed instanceof LivingEntity livingPushed) {
             double ratio = getRatio(pusher, pushed);
-            if (ratio >= TRAMPLE_RATIO) {
+            if (ratio >= Server.TRAMPLE_RATIO.get()) {
                 livingPushed.hurt(livingPushed.damageSources().cramming(), 2);
             }
         }

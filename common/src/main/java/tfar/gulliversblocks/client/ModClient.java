@@ -12,11 +12,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
 import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.MountPosition;
+import tfar.gulliversblocks.config.GulliversBlocksConfig;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.network.C2SActionPacket;
-import tfar.gulliversblocks.network.C2SDropHeldEntityPacket;
 
-import java.util.List;
 import java.util.Map;
 
 public class ModClient {
@@ -101,7 +100,7 @@ public class ModClient {
     }
 
     public static void adjustArms(Player player,ModelPart leftArm,ModelPart rightArm) {
-        if (player.getBbHeight() < GulliversBlocks.PAPER_FLOAT_SIZE && player.getMainHandItem().is(Items.PAPER) || player.getOffhandItem().is(Items.PAPER)) {
+        if (player.getBbHeight() < GulliversBlocksConfig.Server.PAPER_FLOAT_SIZE.get() && GulliversBlocks.eitherHandHas(player,stack -> stack.is(Items.PAPER))) {
             float x = (float) Math.PI;
             float z = 0.05f;
 

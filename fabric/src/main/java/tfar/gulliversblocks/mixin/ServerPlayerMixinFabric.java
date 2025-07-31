@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import tfar.gulliversblocks.GulliversBlocks;
 import tfar.gulliversblocks.duck.LivingEntityDuck;
 import tfar.gulliversblocks.config.GulliversBlocksConfig;
 
@@ -23,7 +22,7 @@ public abstract class ServerPlayerMixinFabric {
     private void onSleep(BlockPos bedPos, CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         ServerPlayer player = (ServerPlayer)(Object) this;
         double scale = GulliversBlocksConfig.Server.SCALES.get().getOrDefault(LivingEntityDuck.of(player).gulliversBlocks$getGulliverScale(),1d);
-        if (scale > GulliversBlocks.MAX_SLEEPING_SIZE) {
+        if (scale > GulliversBlocksConfig.Server.MAX_SLEEPING_SIZE.get()) {
             displayClientMessage(Component.translatable("sleep.too_big"), true);
             cir.setReturnValue(Either.left(Player.BedSleepingProblem.OTHER_PROBLEM));
         }

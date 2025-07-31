@@ -1,7 +1,5 @@
 package tfar.gulliversblocks.config;
 
-import com.electronwill.nightconfig.core.CommentedConfig;
-import com.electronwill.nightconfig.toml.TomlFormat;
 import it.unimi.dsi.fastutil.ints.Int2DoubleLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.ints.Int2DoubleMap;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -9,7 +7,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import tfar.gulliversblocks.GulliverScales;
 import tfar.gulliversblocks.Scaling;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class GulliversBlocksConfig {
@@ -40,6 +37,16 @@ public class GulliversBlocksConfig {
 
     public static class Server {
 
+        public static ModConfigSpec.DoubleValue TRAMPLE_FARMLAND_SIZE;
+        public static ModConfigSpec.DoubleValue DROWN_IN_RAIN_SIZE;
+        public static ModConfigSpec.DoubleValue PRESSURE_PLATE_SIZE;
+        public static ModConfigSpec.DoubleValue CACTUS_PRICK_SIZE;
+        public static ModConfigSpec.DoubleValue CLIMB_BLOCKS_SIZE;
+        public static ModConfigSpec.DoubleValue TRAMPLE_RATIO;
+        public static ModConfigSpec.DoubleValue PAPER_FLOAT_SIZE;
+        public static ModConfigSpec.DoubleValue FISHING_ROD_GRAPPLE_SCALE;
+        public static ModConfigSpec.DoubleValue MAX_SLEEPING_SIZE;
+        
         public static ModConfigSpec.ConfigValue<Scaling> BLOCK_BREAK_SPEED_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> MAX_HEALTH_SCALING;
         public static ModConfigSpec.DoubleValue MINIMUM_MAX_HEALTH_SCALE;
@@ -48,6 +55,8 @@ public class GulliversBlocksConfig {
         public static ModConfigSpec.ConfigValue<Scaling> FALL_DAMAGE_MULTIPLIER_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> SAFE_FALL_DISTANCE_SCALING;
         public static ModConfigSpec.ConfigValue<Scaling> THROWN_POTION_MOTION_SCALING;
+        public static ModConfigSpec.ConfigValue<Scaling> GRAVITY_SCALING;
+        public static ModConfigSpec.ConfigValue<Scaling> JUMP_SCALING;
 
         public static ConfigHelper.ConfigObject<Map<Integer,Double>> SCALES;
 
@@ -62,12 +71,27 @@ public class GulliversBlocksConfig {
             MAX_HEALTH_SCALING = builder.defineEnum("generic.max_health",Scaling.LINEAR);
             MINIMUM_MAX_HEALTH_SCALE = builder.defineInRange("minimum_max_health_scale",.5,0,1);
             ATTACK_DAMAGE_SCALING = builder.defineEnum("generic.attack_damage",Scaling.SQUARE_ROOT);
-            MOVEMENT_SPEED_SCALING = builder.defineEnum("generic.movement_speed",Scaling.INVERSE_SQUARE_ROOT);
+            MOVEMENT_SPEED_SCALING = builder.defineEnum("generic.movement_speed",Scaling.INVERSE_SQUARE_ROOT_ABOVE_INVERSE_THREE_QUARTERS_BELOW);
             FALL_DAMAGE_MULTIPLIER_SCALING = builder.defineEnum("generic.fall_damage_multiplier",Scaling.LINEAR);
             SAFE_FALL_DISTANCE_SCALING = builder.defineEnum("generic.safe_fall_distance",Scaling.INVERSE_SQUARE_ROOT);
             MAX_RIDING_RATIO = builder.defineInRange("max_riding_ratio",2,1,Double.MAX_VALUE);
+            TRAMPLE_RATIO = builder.defineInRange("trample_ratio",8,2,100000000d);
             THROWN_POTION_MOTION_SCALING = builder.defineEnum("thrown_potion_scaling",Scaling.SQUARE_ROOT);
+            GRAVITY_SCALING = builder.defineEnum("gravity_scaling",Scaling.INVERSE_CUBE_ROOT_ABOVE_NONE_BELOW);
+            JUMP_SCALING = builder.defineEnum("jump_scaling",Scaling.INVERSE_CUBE_ROOT);
+
+            TRAMPLE_FARMLAND_SIZE = builder.defineInRange("trample_farmland_size",1.8 * 1 / 2d,0,2);
+            DROWN_IN_RAIN_SIZE = builder.defineInRange("drown_in_rain_size",1.8 * 1 / 2d,0,2);
+            PRESSURE_PLATE_SIZE = builder.defineInRange("pressure_plate_size",1.8 * 1 / 2d,0,2);
+            CACTUS_PRICK_SIZE = builder.defineInRange("cactus_size",1.8 * 1 / 2d,0,2);
+            CLIMB_BLOCKS_SIZE = builder.defineInRange("climb_blocks_size",1 / 2d,0,2);
+            PAPER_FLOAT_SIZE = builder.defineInRange("paper_float_size",1 / 2d,0,2);
+            FISHING_ROD_GRAPPLE_SCALE = builder.defineInRange("fishing_rod_grapple_size",1 / 2d,0,2);
+            MAX_SLEEPING_SIZE = builder.defineInRange("max_sleeping_size",1.25,0,1000000000);
+
             builder.pop();
         }
+
+
     }
 }
